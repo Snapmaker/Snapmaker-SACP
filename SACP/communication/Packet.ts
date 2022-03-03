@@ -14,13 +14,16 @@ export default class Packet {
         this.payload = payload;
     }
 
-    updateChecksum() {
+    toBuffer() {
         this.header.updateBuffer();
         const buffer = Buffer.concat([this.header.buffer, this.payload]);
         this.checksum = calcChecksum(buffer, 7, buffer.byteLength - 9);
+        return Buffer.concat([buffer, Buffer.from([this.checksum])]);
     }
 
-    parse(buffer: Buffer) {
-        
+    static parse(buffer: Buffer) {
+        const header = new Header().parse(buffer.slice(0, 13));
+        const payload = buffer.slice(13);
+        return new Packet(header, payload);
     }
 }

@@ -6,7 +6,7 @@
  * https://snapmaker2.atlassian.net/wiki/spaces/XIEK/pages/2001404989/Luban+SACP+--
  */
 import net from 'net'
-import SACP from './SACP/communication/SACP'
+import SACP from './SACP/communication/Communication'
 import TCPConnections from './SACP/connection/TCPConnection';
 
 const sacp = new SACP();

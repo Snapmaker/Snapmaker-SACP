@@ -1,5 +1,5 @@
 import { Socket } from 'net';
-import SACP from '../communication/SACP';
+import SACP from '../communication/Communication';
 import ConnectionInterface from './ConnectionInterface';
 
 export default class TCPConnections implements ConnectionInterface {

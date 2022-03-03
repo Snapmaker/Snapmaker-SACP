@@ -65,5 +65,6 @@ export default class Header {
         this.sequence = readUint16(buffer, 9);
         this.commandSet = readUint8(buffer, 11);
         this.commandId = readUint8(buffer, 12);
+        return this;
     }
 }
