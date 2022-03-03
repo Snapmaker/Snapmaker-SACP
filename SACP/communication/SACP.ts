@@ -54,8 +54,21 @@ export default class SACP extends EventEmitter {
 
     }
 
-    subscribe() {
-
+    subscribe(buffer: Buffer) {
+        globalSequence++;
+        globalSequence %= 0xffff; 
+        return new Promise((resolve, reject) => {
+            this.subscribeHandlerMap.set(globalSequence, {
+                startTime: Date.now(),
+                success: resolve,
+                fail: reject
+            });
+            if (this.connection) {
+                buffer.writeUInt8(0, 8);
+                buffer.writeUInt16LE(globalSequence, 9);
+                this.connection.write(buffer);
+            }
+        });
     }
 
     unsubscribe() {}
@@ -117,7 +130,7 @@ export default class SACP extends EventEmitter {
                     const commandId = this.receiveBuffer.readUInt8(12);
                     // a notification packet
                     if (commandSet === 0x01 && commandId >= 0xa0) {
-                        
+
                     }
                 }
             } else if (attribute === 0) {
