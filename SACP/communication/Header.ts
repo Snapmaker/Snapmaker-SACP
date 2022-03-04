@@ -1,12 +1,15 @@
 import { calcCRC8, readUint16, readUint8, writeSOF, writeUint16, writeUint8 } from '../helper';
 
-enum PeerId {
+export enum PeerId {
     LUBAN, CONTROLLER, SCREEN
 }
 
 export enum Attribute {
     REQUEST, ACK
 }
+
+let defaultReceiverId = PeerId.CONTROLLER;
+let defaultSenderId = PeerId.LUBAN;
 
 export default class Header {
     static byteLength = 13;
@@ -17,11 +20,11 @@ export default class Header {
 
     version: number = 0x01;
 
-    receiverId: PeerId = PeerId.CONTROLLER;
+    receiverId: PeerId = defaultReceiverId;
 
     crc: number = 0;
 
-    senderId: PeerId = PeerId.LUBAN;
+    senderId: PeerId = defaultSenderId;
 
     attribute: Attribute = Attribute.REQUEST;
 
@@ -36,6 +39,14 @@ export default class Header {
     constructor() {
         this.buffer = Buffer.alloc(Header.byteLength, 0);
         writeSOF(this.buffer, 0, this.sof);
+    }
+
+    static updateDefaultReceiverId(id: PeerId) {
+        defaultReceiverId = id;
+    }
+
+    static updateDefaultSenderId(id: PeerId) {
+        defaultSenderId = id;
     }
 
     updateBuffer() {

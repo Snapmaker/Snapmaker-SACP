@@ -19,13 +19,20 @@ export default class Business extends EventEmitter {
 
     constructor(type: string, socket: any) {
         super();
+        if (!socket) {
+            throw new Error('missing socket');
+        }
+
         this.communication = new Communication();
         this.handlerMap = new Map();
+
         let connection;
         if (type === 'tcp') {
             connection = new TCPConnection(this.communication, socket);
-        } else {
+        } else if (type === 'serialport') {
             connection = new SerialPortConnection(this.communication, socket);
+        } else {
+            throw new Error('missing type');
         }
         this.communication.setConnection(connection);
 
@@ -43,7 +50,7 @@ export default class Business extends EventEmitter {
         // this is a notification
         if (commandSet === 0x01 && commandId >= 0xa0) {
             this.emit(`${businessId}`, packet);
-        } else {
+        } else if (packet.header.attribute === Attribute.REQUEST) {
             // a request packet
             const callback = this.handlerMap.get(businessId);
             const response = new Response(packet.payload);
@@ -58,20 +65,38 @@ export default class Business extends EventEmitter {
 
     subscribe(commandSet: number, commandId: number, interval: number, callback: Callback) {
         const businessId = commandSet * 256 + commandId;
-        callback && this.on(`${businessId}`, callback);
 
-        const intervalBuffer = Buffer.alloc(2, 0);
-        intervalBuffer.writeUint16LE(interval, 0);
+        if (callback) {
+            const listeners = this.listeners(`${businessId}`);
+            if (listeners.length > 0) {
+                this.on(`${businessId}`, callback);
+                return Promise.resolve();
+            } else {
+                const intervalBuffer = Buffer.alloc(2, 0);
+                intervalBuffer.writeUint16LE(interval, 0);
 
-        const payload = Buffer.concat([Buffer.from([commandSet, commandId]), intervalBuffer]);
-        return this.send(0x01, 0x00, payload).catch(() => {
-            callback && this.off(`${businessId}`, callback);
-        });
+                const payload = Buffer.concat([Buffer.from([commandSet, commandId]), intervalBuffer]);
+                return this.send(0x01, 0x00, payload).catch(() => {
+                    callback && this.off(`${businessId}`, callback);
+                });
+            }
+        }
+        return Promise.reject(new Error('missing callback'));
     }
 
-    unsubscribe(commandSet: number, commandId: number) {
-        const payload = Buffer.from([commandSet, commandId]);
-        return this.send(0x01, 0x01, payload);
+    unsubscribe(commandSet: number, commandId: number, callback: Callback) {
+        if (callback) {
+            const payload = Buffer.from([commandSet, commandId]);
+            return this.send(0x01, 0x01, payload).then(({ response, packet }) => {
+                if (response.result === 0) {
+                    const commandSet = packet.header.commandSet;
+                    const commandId = packet.header.commandId;
+                    const businessId = commandSet * 256 + commandId;
+                    this.removeAllListeners(`${businessId}`);
+                }
+            });
+        }
+        return Promise.reject(new Error('missing callback'));
     }
 
     send(commandSet: number, commandId: number, payload: Buffer) {

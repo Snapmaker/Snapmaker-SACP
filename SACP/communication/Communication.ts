@@ -1,6 +1,7 @@
 import EventEmitter from 'events';
 import ConnectionInterface from '../connection/ConnectionInterface';
 import { calcChecksum, calcCRC8 } from '../helper';
+import { Attribute } from './Header';
 import Packet from './Packet';
 
 let globalSequence: number = 0;
@@ -46,7 +47,6 @@ export default class Communication extends EventEmitter {
                 fail: reject
             });
             if (this.connection) {
-                // buffer.writeUInt8(0, 8);
                 buffer.writeUInt16LE(globalSequence, 9);
                 this.connection.write(buffer);
             }
@@ -107,32 +107,26 @@ export default class Communication extends EventEmitter {
             // console.log(2221)
             const attribute = this.receiveBuffer.readUInt8(8);
             // console.log(attribute)
-            if (attribute === 1) {
-                const commandSet = this.receiveBuffer.readUInt8(11);
-                const commandId = this.receiveBuffer.readUInt8(12);
-                // a notification packet
-                if (commandSet === 0x01 && commandId >= 0xa0) {
-                    this.emit('request', Packet.parse(this.receiveBuffer));
-                } else {
-                    // ACK packet
-                    const sequence = this.receiveBuffer.readUInt16LE(9);
-                    const handler = this.requestHandlerMap.get(sequence);
-                    if (handler) {
-                        handler.success(Packet.parse(this.receiveBuffer));
-                        this.requestHandlerMap.delete(sequence);
-                    } else {
-                        // invalid packet, drop it
-                    }
-                }
-            } else if (attribute === 0) {
-                // request packet
+            if (attribute === Attribute.ACK) {
                 const sequence = this.receiveBuffer.readUInt16LE(9);
                 const handler = this.requestHandlerMap.get(sequence);
                 if (handler) {
-                    // ack a sent request, this is wrong, need fix
+                    // ACK packet related to request
                     handler.success(Packet.parse(this.receiveBuffer));
                     this.requestHandlerMap.delete(sequence);
                 } else {
+                    // notification packet
+                    this.emit('request', Packet.parse(this.receiveBuffer));
+                }
+            } else if (attribute === Attribute.REQUEST) {
+                const sequence = this.receiveBuffer.readUInt16LE(9);
+                const handler = this.requestHandlerMap.get(sequence);
+                if (handler) {
+                    // ack a sent request, this is wrong, need fix from Master Controller
+                    handler.success(Packet.parse(this.receiveBuffer));
+                    this.requestHandlerMap.delete(sequence);
+                } else {
+                    // request packet
                     this.emit('request', Packet.parse(this.receiveBuffer));
                 }
             }
