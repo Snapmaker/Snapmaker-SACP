@@ -3,4 +3,5 @@ export default interface ConnectionInterface {
 
     read: (buffer: Buffer) => void;
 
+    end: () => void;
 }

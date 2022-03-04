@@ -116,7 +116,7 @@ export function readSOF(buffer: Buffer, offset: number = 0) {
 }
 
 export function writeSOF(buffer: Buffer, offset: number = 0, value: number) {
-    return buffer.writeUInt32BE(value, offset); // notice, there is an exception
+    return buffer.writeUInt16BE(value, offset); // notice, there is an exception
 }
 
 // calcChecksum() and calcCRC8() are copied from Fabscreen

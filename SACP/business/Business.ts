@@ -1,14 +1,26 @@
+import EventEmitter from "events";
 import Communication from "../communication/Communication";
 import TCPConnection from "../connection/TCPConnection";
 import SerialPortConnection from "../connection/SerialPortConnection";
 import Packet from "../communication/Packet";
-import Header from "../communication/Header";
+import Header, { Attribute } from "../communication/Header";
+import Response from '../communication/Response';
 
-export default class Business {
+type HandlerResponse = {
+    response?: Response;
+    packet?: Packet;
+}
+
+type Callback = (handlerResponse: HandlerResponse) => void;
+export default class Business extends EventEmitter {
     communication: Communication;
 
+    handlerMap: Map<number, Callback>;
+
     constructor(type: string, socket: any) {
+        super();
         this.communication = new Communication();
+        this.handlerMap = new Map();
         let connection;
         if (type === 'tcp') {
             connection = new TCPConnection(this.communication, socket);
@@ -17,49 +29,92 @@ export default class Business {
         }
         this.communication.setConnection(connection);
 
-        this.communication.on('request', this.handler);
+        this.communication.on('request', (packet) => {
+            this.packetHandler(packet);
+        });
     }
 
-    handler(buffer: Buffer) {
-        const packet = Packet.parse(buffer);
+    // handle request from Controller or Screen
+    private packetHandler(packet: Packet) {
+        // // console.log(packet)
         const commandSet = packet.header.commandSet;
         const commandId = packet.header.commandId;
         const businessId = commandSet * 256 + commandId;
-        switch (businessId) {
-            case 0x0100: break; // subscribe
-            case 0x0101: break; // unsubscribe
-            case 0x01a0: break;
-            case 0x0120: break;
-            default: break;
+        // this is a notification
+        if (commandSet === 0x01 && commandId >= 0xa0) {
+            this.emit(`${businessId}`, packet);
+        } else {
+            // a request packet
+            const callback = this.handlerMap.get(businessId);
+            const response = new Response(packet.payload);
+            callback && callback({ response, packet });
         }
     }
 
-    subscribe(commandSet: number, commandId: number, interval: number) {
-      const intervalBuffer = Buffer.alloc(2);
-      intervalBuffer.writeUint16LE(interval, 0)
+    setHandler(commandSet: number, commandId: number, callback: Callback) {
+        const businessId = commandSet * 256 + commandId;
+        this.handlerMap.set(businessId, callback);
+    }
 
-      const payload = Buffer.concat([Buffer.from([commandSet, commandId]), intervalBuffer]);
-      const header = new Header();
-      header.length = payload.byteLength + 7;
-      header.commandSet = 0x01;
-      header.commandId = 0x00;
-      header.updateBuffer();
+    subscribe(commandSet: number, commandId: number, interval: number, callback: Callback) {
+        const businessId = commandSet * 256 + commandId;
+        callback && this.on(`${businessId}`, callback);
 
-      const packet = new Packet(header, payload);
-      return this.communication.request(packet.toBuffer());
+        const intervalBuffer = Buffer.alloc(2, 0);
+        intervalBuffer.writeUint16LE(interval, 0);
+
+        const payload = Buffer.concat([Buffer.from([commandSet, commandId]), intervalBuffer]);
+        return this.send(0x01, 0x00, payload).catch(() => {
+            callback && this.off(`${businessId}`, callback);
+        });
     }
 
     unsubscribe(commandSet: number, commandId: number) {
-      const payload = Buffer.from([commandSet, commandId]);
-      const header = new Header();
-      header.length = payload.byteLength + 7;
-      header.commandSet = 0x01;
-      header.commandId = 0x01;
-      header.updateBuffer();
-
-      const packet = new Packet(header, payload);
-      return this.communication.request(packet.toBuffer());
+        const payload = Buffer.from([commandSet, commandId]);
+        return this.send(0x01, 0x01, payload);
     }
 
-    ack() {}
+    send(commandSet: number, commandId: number, payload: Buffer) {
+        const header = new Header();
+        header.length = payload.byteLength + 8;
+        header.commandSet = commandSet;
+        header.commandId = commandId;
+        header.attribute = Attribute.REQUEST;
+        header.sequence = this.communication.getSequence();
+        header.updateBuffer();
+
+        const packet = new Packet(header, payload);
+        return this.communication.send(packet.toBuffer()).then(packet => {
+            const response = new Response(packet.payload);
+            return { response, packet } as HandlerResponse;
+        });
+    }
+
+    ack(commandSet: number, commandId: number, payload: Buffer) {
+        const header = new Header();
+        header.length = payload.byteLength + 8;
+        header.commandSet = commandSet;
+        header.commandId = commandId;
+        header.attribute = Attribute.ACK;
+        header.sequence = this.communication.getSequence();
+        header.updateBuffer();
+
+        const packet = new Packet(header, payload);
+        return this.communication.send(packet.toBuffer()).then(packet => {
+            const response = new Response(packet.payload);
+            return { response, packet } as HandlerResponse;
+        });;
+    }
+
+    read(buffer: Buffer) {
+        this.communication.connection?.read(buffer);
+    }
+
+    end() {
+        this.communication.connection?.end();
+    }
+
+    subHeartbeat({ interval = 1000 }, callback: Callback) {
+        this.subscribe(0x01, 0xa0, interval, callback);
+    }
 }

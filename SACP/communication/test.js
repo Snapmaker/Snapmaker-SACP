@@ -55,7 +55,7 @@ function receive(buffer) {
                         receiving = false;
                         const result = validateChecksum(receiveBuffer);
                         if (result) {
-                            console.log(result);
+                            // console.log(result);
                             // emit('')
                             // new Packet().parse(buffer);
                         }

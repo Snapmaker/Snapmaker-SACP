@@ -1,29 +1,32 @@
 import { calcChecksum } from '../helper';
 import Header from './Header';
-// import Payload from './Payload';
 
 export default class Packet {
     header: Header;
 
     payload: Buffer;
 
-    checksum: number;
+    checksum: Buffer;
 
-    constructor(header: Header, payload: Buffer) {
+    constructor(header: Header, payload: Buffer, checksum?: Buffer) {
         this.header = header;
         this.payload = payload;
+        this.checksum = checksum ?? Buffer.alloc(2, 0);
     }
 
     toBuffer() {
         this.header.updateBuffer();
         const buffer = Buffer.concat([this.header.buffer, this.payload]);
-        this.checksum = calcChecksum(buffer, 7, buffer.byteLength - 9);
-        return Buffer.concat([buffer, Buffer.from([this.checksum])]);
+        const checksumNumber = calcChecksum(buffer, 7, buffer.byteLength - 7);
+        this.checksum = Buffer.alloc(2, 0);
+        this.checksum.writeUint16LE(checksumNumber, 0);
+        return Buffer.concat([buffer, this.checksum]);
     }
 
     static parse(buffer: Buffer) {
         const header = new Header().parse(buffer.slice(0, 13));
-        const payload = buffer.slice(13);
-        return new Packet(header, payload);
+        const payload = buffer.slice(13, buffer.length - 2);
+        const checksum = buffer.slice(buffer.length - 2);
+        return new Packet(header, payload, checksum);
     }
 }
