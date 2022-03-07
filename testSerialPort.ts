@@ -16,21 +16,24 @@ import SACPBusiness from './SACP/business/Business'
         })
         sp.open();
 
-        b.subHeartbeat({
-            interval: 1000
-        }, function({response, packet}) {
+
+        function cb(p) {
             console.log(
                 new Date(),
-                'receive heartbeat from ', packet.header.senderId,
-                '\nresult is ', response.result,
-                '\nsystem state ', response.data
+                'receive heartbeat from ', p.packet.header.senderId,
+                '\nresult is ', p.response.result,
+                '\nsystem state ', p.response.data
             )
             setTimeout(() => {
-                b.unsubscribe(0x01, 0xa0).then(() => {
+                b.unsubscribe(0x01, 0xa0, cb).then(() => {
                     console.log('unsubscribed heartbeat')
                 })
             }, 5000);
-        })
+        }
+
+        b.subHeartbeat({
+            interval: 1000
+        }, cb)
         // b.send(0x01, 0x21, Buffer.alloc(0)).then(console.log)
         // b.send(0xac, 0x03, ) // 开始打印
     }

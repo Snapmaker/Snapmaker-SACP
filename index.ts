@@ -47,7 +47,7 @@ server
                 interval: 1000
             }, (p) => {
                 if (p) {
-                    console.log('success', p.payload)
+                    console.log('success', p.response.data)
                 }
             })
             // b1.subHeartbeat({
