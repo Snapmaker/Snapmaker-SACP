@@ -29,6 +29,15 @@ export default class Communication extends EventEmitter {
         super();
     }
 
+    dispose() {
+        this.receiveBuffer = Buffer.alloc(0);
+        this.receiving = false;
+        this.remainLength = 0;
+        this.timeout = 0;
+        this.requestHandlerMap.clear();
+        this.connection = null;
+    }
+
     setConnection(connection: ConnectionInterface) {
         this.connection = connection;
     }
@@ -136,9 +145,9 @@ export default class Communication extends EventEmitter {
 
     private validateChecksum(buffer: Buffer) {
         const checksum = calcChecksum(buffer, 7, buffer.byteLength - 9);
-        console.log(checksum, buffer, buffer.readUInt16LE(buffer.byteLength - 2))
+        // console.log(checksum, buffer, buffer.readUInt16LE(buffer.byteLength - 2))
         if (checksum === buffer.readUInt16LE(buffer.byteLength - 2)) {
-            console.log(0)
+            // console.log(0)
             return true;
         }
         return false;

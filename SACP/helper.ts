@@ -112,7 +112,7 @@ export function writeArray(buffer: Buffer, offset: number = 0, value: Buffer) {
 }
 
 export function readSOF(buffer: Buffer, offset: number = 0) {
-    return buffer.readUInt32BE(offset); // notice, there is an exception
+    return buffer.readUInt16BE(offset); // notice, there is an exception
 }
 
 export function writeSOF(buffer: Buffer, offset: number = 0, value: number) {

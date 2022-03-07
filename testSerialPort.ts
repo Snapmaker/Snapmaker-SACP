@@ -1,5 +1,5 @@
 import SerialPort from 'serialport'
-import SACPBusiness from './SACP/business/Business'
+import SACPBusiness, { HandlerResponse } from './SACP/business/Business'
 
 (async function() {
     // console.log(SerialPort)
@@ -17,7 +17,7 @@ import SACPBusiness from './SACP/business/Business'
         sp.open();
 
 
-        function cb(p) {
+        function cb(p: HandlerResponse) {
             console.log(
                 new Date(),
                 'receive heartbeat from ', p.packet.header.senderId,

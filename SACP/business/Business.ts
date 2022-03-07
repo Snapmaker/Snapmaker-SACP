@@ -6,9 +6,9 @@ import Packet from "../communication/Packet";
 import Header, { Attribute } from "../communication/Header";
 import Response from '../communication/Response';
 
-type HandlerResponse = {
-    response?: Response;
-    packet?: Packet;
+export type HandlerResponse = {
+    response: Response;
+    packet: Packet;
 }
 
 type Callback = (handlerResponse: HandlerResponse) => void;
@@ -63,42 +63,6 @@ export default class Business extends EventEmitter {
         this.handlerMap.set(businessId, callback);
     }
 
-    subscribe(commandSet: number, commandId: number, interval: number, callback: Callback) {
-        const businessId = commandSet * 256 + commandId;
-
-        if (callback) {
-            const listeners = this.listeners(`${businessId}`);
-            if (listeners.length > 0) {
-                this.on(`${businessId}`, callback);
-                return Promise.resolve();
-            } else {
-                const intervalBuffer = Buffer.alloc(2, 0);
-                intervalBuffer.writeUint16LE(interval, 0);
-
-                const payload = Buffer.concat([Buffer.from([commandSet, commandId]), intervalBuffer]);
-                return this.send(0x01, 0x00, payload).catch(() => {
-                    callback && this.off(`${businessId}`, callback);
-                });
-            }
-        }
-        return Promise.reject(new Error('missing callback'));
-    }
-
-    unsubscribe(commandSet: number, commandId: number, callback: Callback) {
-        if (callback) {
-            const payload = Buffer.from([commandSet, commandId]);
-            return this.send(0x01, 0x01, payload).then(({ response, packet }) => {
-                if (response.result === 0) {
-                    const commandSet = packet.header.commandSet;
-                    const commandId = packet.header.commandId;
-                    const businessId = commandSet * 256 + commandId;
-                    this.removeAllListeners(`${businessId}`);
-                }
-            });
-        }
-        return Promise.reject(new Error('missing callback'));
-    }
-
     send(commandSet: number, commandId: number, payload: Buffer) {
         const header = new Header();
         header.length = payload.byteLength + 8;
@@ -137,6 +101,36 @@ export default class Business extends EventEmitter {
 
     end() {
         this.communication.connection?.end();
+    }
+
+    subscribe(commandSet: number, commandId: number, interval: number, callback: Callback) {
+        const businessId = commandSet * 256 + commandId;
+
+        const listeners = this.listeners(`${businessId}`);
+        if (listeners.length > 0) {
+            this.on(`${businessId}`, callback);
+            return Promise.resolve();
+        } else {
+            const intervalBuffer = Buffer.alloc(2, 0);
+            intervalBuffer.writeUint16LE(interval, 0);
+
+            const payload = Buffer.concat([Buffer.from([commandSet, commandId]), intervalBuffer]);
+            return this.send(0x01, 0x00, payload).catch(() => {
+                callback && this.off(`${businessId}`, callback);
+            });
+        }
+    }
+
+    unsubscribe(commandSet: number, commandId: number, callback: Callback) {
+        const payload = Buffer.from([commandSet, commandId]);
+        return this.send(0x01, 0x01, payload).then(({ response, packet }) => {
+            if (response.result === 0) {
+                const commandSet = packet.header.commandSet;
+                const commandId = packet.header.commandId;
+                const businessId = commandSet * 256 + commandId;
+                this.removeAllListeners(`${businessId}`);
+            }
+        });
     }
 
     subHeartbeat({ interval = 1000 }, callback: Callback) {
