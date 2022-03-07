@@ -43,13 +43,14 @@ export default class Business extends EventEmitter {
 
     // handle request from Controller or Screen
     private packetHandler(packet: Packet) {
-        // // console.log(packet)
+        console.log(packet)
         const commandSet = packet.header.commandSet;
         const commandId = packet.header.commandId;
         const businessId = commandSet * 256 + commandId;
         // this is a notification
         if (commandSet === 0x01 && commandId >= 0xa0) {
-            this.emit(`${businessId}`, packet);
+            const response = new Response(packet.payload);
+            this.emit(`${businessId}`, { response, packet } as HandlerResponse);
         } else if (packet.header.attribute === Attribute.REQUEST) {
             // a request packet
             const callback = this.handlerMap.get(businessId);
@@ -107,10 +108,12 @@ export default class Business extends EventEmitter {
         const businessId = commandSet * 256 + commandId;
 
         const listeners = this.listeners(`${businessId}`);
+        console.log(listeners)
         if (listeners.length > 0) {
             this.on(`${businessId}`, callback);
             return Promise.resolve();
         } else {
+            this.on(`${businessId}`, callback);
             const intervalBuffer = Buffer.alloc(2, 0);
             intervalBuffer.writeUint16LE(interval, 0);
 

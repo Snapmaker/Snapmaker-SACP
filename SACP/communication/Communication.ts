@@ -38,6 +38,16 @@ export default class Communication extends EventEmitter {
         this.connection = null;
     }
 
+    static setInitialSequence(num: number) {
+        globalSequence = num;
+    }
+
+    getReceiveBuffer() {
+        const tempBuffer = Buffer.alloc(this.receiveBuffer.length);
+        this.receiveBuffer.copy(tempBuffer);
+        return tempBuffer;
+    }
+
     setConnection(connection: ConnectionInterface) {
         this.connection = connection;
     }
@@ -55,7 +65,8 @@ export default class Communication extends EventEmitter {
                 success: resolve,
                 fail: reject
             });
-            if (this.connection) {
+            // empty payload buffer should be length of 15
+            if (this.connection && buffer.length >= 15) {
                 buffer.writeUInt16LE(globalSequence, 9);
                 this.connection.write(buffer);
             }
@@ -87,7 +98,7 @@ export default class Communication extends EventEmitter {
             }
         } else {
             // receive bytes from next buffer
-            console.log(this.remainLength, buffer.byteLength)
+            // console.log(this.remainLength, buffer.byteLength)
             if (this.remainLength >= buffer.byteLength) {
                 this.receiveBuffer = Buffer.concat([this.receiveBuffer, buffer.slice(0, buffer.byteLength)]);
                 this.remainLength -= buffer.byteLength;
