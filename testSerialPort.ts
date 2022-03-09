@@ -18,22 +18,10 @@ import CoordinateSystemInfo from './SACP/business/models/CoordinateSystemInfo'
         })
         sp.open();
 
-        // b.subscribeHeartbeat({ interval: 1000 }, (res) => {
-        //     console.log(res)
-        // })
+        b.subscribeHeartbeat({ interval: 1000 }, (res) => {
+            console.log(res)
+        })
 
-        // function cb(p: HandlerResponse) {
-        //     console.log(
-        //         new Date(),
-        //         'receive heartbeat from ', p.packet.header.senderId,
-        //         '\nresult is ', p.response.result,
-        //         '\nsystem state ', p.response.data
-        //     )
-        // }
-
-        // b.subHeartbeat({
-        //     interval: 1000
-        // }, cb)
         // setTimeout(() => {
         //     b.unsubscribe(0x01, 0xa0, cb).then(() => {
         //         console.log('unsubscribed heartbeat')
@@ -41,9 +29,9 @@ import CoordinateSystemInfo from './SACP/business/models/CoordinateSystemInfo'
         // }, 5000);
         
         // b.send(0x01, 0x21, Buffer.alloc(0)).then(console.log)
-        b.getCurrentCoordinateInfo().then(res => {
-            console.log(2222, res)
-        })
+        // b.getCurrentCoordinateInfo().then(res => {
+        //     console.log(2222, res)
+        // })
         // b.send(0xac, 0x03, ) // 开始打印
     }
 

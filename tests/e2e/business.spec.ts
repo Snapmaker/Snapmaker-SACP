@@ -32,20 +32,21 @@ describe('business', () => {
         assert.notEqual(business, undefined)
     })
 
-    xit('subscribe() & unsubscribe() should work', function(done) {
+    it('subscribe() & unsubscribe() should work', function(done) {
+        // aa 55 0a 00 01 01 53 01 00 90 a0 01 a0 00 00 bf 6c
         business.subscribeHeartbeat({
             interval: 500
-        }, ({ response, packet }: HandlerResponse) => {
+        }, function ({ response, packet }) {
+            done()
             assert.equal(response.result, 0)
             const systemStatus = response.data
             assert.equal(systemStatus, 0) // idle
             console.log(response)
-            done()
         })
-        .then(({ response }) => {
-            assert.equal(response.result, 0)
+        // .then(({ response }) => {
+        //     assert.equal(response.result, 0)
             // done()
-        })
+        // })
         // .then(() => {
         //     setTimeout(() => {
         //         business.unsubscribeHeartbeat(cb).then(({ response }) => {
@@ -56,7 +57,7 @@ describe('business', () => {
         // })
     })
 
-    it('getModuleInfo() should work', (done) => {
+    xit('getModuleInfo() should work', (done) => {
         business.getModuleInfo().then(res => {
             assert.equal(res.response.result, 0)
             console.log(res.moduleInfo)

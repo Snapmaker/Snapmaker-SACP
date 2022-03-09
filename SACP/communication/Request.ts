@@ -17,6 +17,8 @@ export default class Request extends EventEmitter {
 
     handlerMap: Map<number, Callback>;
 
+    events: Map<number, Function[]>;
+
     constructor(type: string, socket: any) {
         super();
         if (!socket) {
@@ -25,6 +27,7 @@ export default class Request extends EventEmitter {
 
         this.communication = new Communication();
         this.handlerMap = new Map();
+        this.events = new Map();
 
         let connection;
         if (type === 'tcp') {
@@ -37,6 +40,7 @@ export default class Request extends EventEmitter {
         this.communication.setConnection(connection);
 
         this.communication.on('request', (packet) => {
+            console.log(packet)
             this.packetHandler(packet);
         });
     }
@@ -55,9 +59,13 @@ export default class Request extends EventEmitter {
         const businessId = commandSet * 256 + commandId;
         // this is a notification
         if (commandSet === 0x01 && commandId >= 0xa0) {
-            // console.log(commandSet, commandId)
+            console.log(commandSet, commandId)
             const response = new Response(packet.payload);
-            this.emit(`${businessId}`, { response, packet } as HandlerResponse);
+            const cbs = this.events.get(businessId);
+            console.log(cbs)
+            cbs?.forEach(cb => {
+                cb({ response, packet } as HandlerResponse);
+            })
         } else if (packet.header.attribute === Attribute.REQUEST) {
             // a request packet
             const callback = this.handlerMap.get(businessId);
@@ -116,24 +124,29 @@ export default class Request extends EventEmitter {
     }
 
     subscribe(commandSet: number, commandId: number, interval: number, callback: Callback) {
-        const businessId = `${commandSet * 256 + commandId}`;
+        const businessId = commandSet * 256 + commandId;
 
-        if (this.listenerCount(businessId) > 0) {
-            this.on(businessId, callback);
+        let cbs = this.events.get(businessId);
+        if (cbs && cbs.length > 0) {
+            cbs.push(callback);
+            this.events.set(businessId, cbs);
             return Promise.resolve({
                 response: { result: 0, data: Buffer.alloc(0) },
                 packet: null
             } as HandlerResponse);
         } else {
-            this.on(businessId, callback);
             const intervalBuffer = Buffer.alloc(2, 0);
             intervalBuffer.writeUint16LE(interval, 0);
 
             const payload = Buffer.concat([Buffer.from([commandSet, commandId]), intervalBuffer]);
             return this.send(0x01, 0x00, payload).then((res) => {
                 // console.log(res)
-                if (res.response.result !== 0) {
-                    this.off(businessId, callback);
+                if (res.response.result === 0) {
+                    if (!cbs) {
+                        cbs = [];
+                    }
+                    cbs.push(callback);
+                    this.events.set(businessId, cbs);
                 }
                 return res;
             });
@@ -146,11 +159,15 @@ export default class Request extends EventEmitter {
             if (res.response.result === 0) {
                 const commandSet = res.packet!.header.commandSet;
                 const commandId = res.packet!.header.commandId;
-                const businessId = `${commandSet * 256 + commandId}`;
-                if (this.listenerCount(businessId) > 1) {
-                    this.removeListener(businessId, callback);
+                const businessId = commandSet * 256 + commandId;
+
+                const cbs = this.events.get(businessId);
+                if (cbs && cbs.length > 1) {
+                    const index = cbs.indexOf(callback);
+                    cbs.splice(index, 1);
+                    this.events.set(businessId, cbs);
                 } else {
-                    this.removeAllListeners(businessId);
+                    this.events.delete(businessId);
                 }
             }
             return res;
