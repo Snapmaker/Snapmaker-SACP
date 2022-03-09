@@ -17,7 +17,7 @@ export default class Request extends EventEmitter {
 
     handlerMap: Map<number, Callback>;
 
-    events: Map<number, Function[]>;
+    events: Map<number, Callback[]>;
 
     constructor(type: string, socket: any) {
         super();
@@ -61,10 +61,10 @@ export default class Request extends EventEmitter {
         if (commandSet === 0x01 && commandId >= 0xa0) {
             console.log(commandSet, commandId)
             const response = new Response(packet.payload);
-            const cbs = this.events.get(businessId);
-            console.log(cbs)
-            cbs?.forEach(cb => {
-                cb({ response, packet } as HandlerResponse);
+            const callbacks = this.events.get(businessId);
+            console.log(callbacks)
+            callbacks?.forEach(callback => {
+                callback({ response, packet } as HandlerResponse);
             })
         } else if (packet.header.attribute === Attribute.REQUEST) {
             // a request packet
@@ -126,10 +126,10 @@ export default class Request extends EventEmitter {
     subscribe(commandSet: number, commandId: number, interval: number, callback: Callback) {
         const businessId = commandSet * 256 + commandId;
 
-        let cbs = this.events.get(businessId);
-        if (cbs && cbs.length > 0) {
-            cbs.push(callback);
-            this.events.set(businessId, cbs);
+        let callbacks = this.events.get(businessId);
+        if (callbacks && callbacks.length > 0) {
+            callbacks.push(callback);
+            this.events.set(businessId, callbacks);
             return Promise.resolve({
                 response: { result: 0, data: Buffer.alloc(0) },
                 packet: null
@@ -142,11 +142,11 @@ export default class Request extends EventEmitter {
             return this.send(0x01, 0x00, payload).then((res) => {
                 // console.log(res)
                 if (res.response.result === 0) {
-                    if (!cbs) {
-                        cbs = [];
+                    if (!callbacks) {
+                        callbacks = [];
                     }
-                    cbs.push(callback);
-                    this.events.set(businessId, cbs);
+                    callbacks.push(callback);
+                    this.events.set(businessId, callbacks);
                 }
                 return res;
             });
@@ -161,11 +161,11 @@ export default class Request extends EventEmitter {
                 const commandId = res.packet!.header.commandId;
                 const businessId = commandSet * 256 + commandId;
 
-                const cbs = this.events.get(businessId);
-                if (cbs && cbs.length > 1) {
-                    const index = cbs.indexOf(callback);
-                    cbs.splice(index, 1);
-                    this.events.set(businessId, cbs);
+                const callbacks = this.events.get(businessId);
+                if (callbacks && callbacks.length > 1) {
+                    const index = callbacks.indexOf(callback);
+                    callbacks.splice(index, 1);
+                    this.events.set(businessId, callbacks);
                 } else {
                     this.events.delete(businessId);
                 }

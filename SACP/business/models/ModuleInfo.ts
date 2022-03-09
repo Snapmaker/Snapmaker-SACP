@@ -59,14 +59,22 @@ export default class ModuleInfo implements Serializable {
         return this;
     }
 
+    getByteLength() {
+        return 10 + 2 + Buffer.from(this.moduleFirmwareVersion).byteLength;
+    }
+
     static parseArray(buffer: Buffer) {
-        // const result = [];
-        // const arrLength = buffer.readUint8(0);
-        // const targetBuffer = buffer.slice(1);
-        // for (let i = 0; i < arrLength; i++) {
-            // const info = targetBuffer.slice(i * ModuleInfo.byteLength, (i + 1) * ModuleInfo.byteLength);
-            // result.push(new ModuleInfo().fromBuffer(info));
-        // }
-        // return result;
+        const result = [];
+        const arrLength = buffer.readUint8(0);
+        const targetBuffer = buffer.slice(1);
+        let byteLength = 0;
+        for (let i = 0; i < arrLength; i++) {
+            const info = targetBuffer.slice(byteLength);
+            const moduleInfo = new ModuleInfo().fromBuffer(info);
+            result.push(moduleInfo);
+            byteLength += moduleInfo.getByteLength();
+            console.log(byteLength)
+        }
+        return result;
     }
 }
