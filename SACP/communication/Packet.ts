@@ -15,8 +15,7 @@ export default class Packet {
     }
 
     toBuffer() {
-        this.header.updateBuffer();
-        const buffer = Buffer.concat([this.header.buffer, this.payload]);
+        const buffer = Buffer.concat([this.header.toBuffer(), this.payload]);
         const checksumNumber = calcChecksum(buffer, 7, buffer.byteLength - 7);
         this.checksum = Buffer.alloc(2, 0);
         this.checksum.writeUint16LE(checksumNumber, 0);

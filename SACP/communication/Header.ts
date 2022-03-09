@@ -34,12 +34,7 @@ export default class Header {
 
     commandId: number = 0;
 
-    buffer: Buffer = Buffer.alloc(0);
-
-    constructor() {
-        this.buffer = Buffer.alloc(Header.byteLength, 0);
-        writeSOF(this.buffer, 0, this.sof);
-    }
+    constructor() {}
 
     static updateDefaultReceiverId(id: PeerId) {
         defaultReceiverId = id;
@@ -49,20 +44,23 @@ export default class Header {
         defaultSenderId = id;
     }
 
-    updateBuffer() {
+    toBuffer() {
+        const buffer = Buffer.alloc(Header.byteLength, 0);
+        writeSOF(buffer, 0, this.sof);
         // set the value of properties of Header instance and call this method to update buffer
-        writeUint16(this.buffer, 2, this.length);
-        writeUint8(this.buffer, 4, this.version);
-        writeUint8(this.buffer, 5, this.receiverId);
+        writeUint16(buffer, 2, this.length);
+        writeUint8(buffer, 4, this.version);
+        writeUint8(buffer, 5, this.receiverId);
 
-        this.crc = calcCRC8(this.buffer, 0, 6);
+        this.crc = calcCRC8(buffer, 0, 6);
 
-        writeUint8(this.buffer, 6, this.crc);
-        writeUint8(this.buffer, 7, this.senderId);
-        writeUint8(this.buffer, 8, this.attribute);
-        writeUint16(this.buffer, 9, this.sequence);
-        writeUint8(this.buffer, 11, this.commandSet);
-        writeUint8(this.buffer, 12, this.commandId);
+        writeUint8(buffer, 6, this.crc);
+        writeUint8(buffer, 7, this.senderId);
+        writeUint8(buffer, 8, this.attribute);
+        writeUint16(buffer, 9, this.sequence);
+        writeUint8(buffer, 11, this.commandSet);
+        writeUint8(buffer, 12, this.commandId);
+        return buffer;
     }
 
     parse(buffer: Buffer) {

@@ -1,5 +1,6 @@
 import SerialPort from 'serialport'
-import SACPBusiness, { HandlerResponse } from './SACP/business/Business'
+import SACPBusiness from './SACP/business/Business'
+import CoordinateSystemInfo from './SACP/business/models/CoordinateSystemInfo'
 
 (async function() {
     // console.log(SerialPort)
@@ -12,19 +13,23 @@ import SACPBusiness, { HandlerResponse } from './SACP/business/Business'
         const b = new SACPBusiness('serialport', sp);
         sp.on('data', (data) => {
             console.log('from sp', data)
-            b.communication.receive(data)
+            b.read(data)
+            // b.communication.receive(data)
         })
         sp.open();
 
+        // b.subscribeHeartbeat({ interval: 1000 }, (res) => {
+        //     console.log(res)
+        // })
 
-        function cb(p: HandlerResponse) {
-            console.log(
-                new Date(),
-                'receive heartbeat from ', p.packet.header.senderId,
-                '\nresult is ', p.response.result,
-                '\nsystem state ', p.response.data
-            )
-        }
+        // function cb(p: HandlerResponse) {
+        //     console.log(
+        //         new Date(),
+        //         'receive heartbeat from ', p.packet.header.senderId,
+        //         '\nresult is ', p.response.result,
+        //         '\nsystem state ', p.response.data
+        //     )
+        // }
 
         // b.subHeartbeat({
         //     interval: 1000
@@ -35,7 +40,12 @@ import SACPBusiness, { HandlerResponse } from './SACP/business/Business'
         //     })
         // }, 5000);
         
-        b.send(0x01, 0x21, Buffer.alloc(0)).then(console.log)
+        // b.send(0x01, 0x21, Buffer.alloc(0)).then(console.log)
+        b.getCurrentCoordinateInfo().then(res => {
+            console.log(2222, res)
+        })
         // b.send(0xac, 0x03, ) // 开始打印
     }
+
+    // new CoordinateSystemInfo().fromBuffer(Buffer.from([0x00, 0x01, 0x00, 0x01, 0x04, 0x00, 0xe0, 0xb1, 0xff, 0xff, 0x06, 0xc8, 0x14, 0x05, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x02, 0x04, 0x38, 0x03, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00]))
 })()

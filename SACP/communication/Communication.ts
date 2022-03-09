@@ -38,6 +38,10 @@ export default class Communication extends EventEmitter {
         this.connection = null;
     }
 
+    static resetSequence() {
+        globalSequence = 0;
+    }
+
     static setInitialSequence(num: number) {
         globalSequence = num;
     }
@@ -59,6 +63,7 @@ export default class Communication extends EventEmitter {
     }
 
     send(buffer: Buffer) {
+        console.log('send', buffer)
         return new Promise<Packet>((resolve, reject) => {
             this.requestHandlerMap.set(globalSequence, {
                 startTime: Date.now(),
@@ -67,7 +72,6 @@ export default class Communication extends EventEmitter {
             });
             // empty payload buffer should be length of 15
             if (this.connection && buffer.length >= 15) {
-                buffer.writeUInt16LE(globalSequence, 9);
                 this.connection.write(buffer);
             }
         });
@@ -122,7 +126,7 @@ export default class Communication extends EventEmitter {
     }
 
     private reolvePacketBuffer() {
-        // console.log(1111)
+        // console.log(1111, this.receiveBuffer)
         if (this.validateChecksum(this.receiveBuffer)) {
             // console.log(2221)
             const attribute = this.receiveBuffer.readUInt8(8);
@@ -136,6 +140,7 @@ export default class Communication extends EventEmitter {
                     this.requestHandlerMap.delete(sequence);
                 } else {
                     // notification packet
+                    console.log('request ack', this.receiveBuffer)
                     this.emit('request', Packet.parse(this.receiveBuffer));
                 }
             } else if (attribute === Attribute.REQUEST) {
@@ -147,6 +152,7 @@ export default class Communication extends EventEmitter {
                     this.requestHandlerMap.delete(sequence);
                 } else {
                     // request packet
+                    console.log('request', this.receiveBuffer)
                     this.emit('request', Packet.parse(this.receiveBuffer));
                 }
             }

@@ -1,4 +1,4 @@
-import { readFloat, readUint16, readUint8 } from '../helper';
+import { readFloat, readUint16, readUint8 } from '../../helper';
 
 enum MoveDirection {
     X1, Y1, Z1, A1, B1, C1, X2

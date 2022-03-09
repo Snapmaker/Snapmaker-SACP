@@ -1,142 +1,59 @@
-import EventEmitter from "events";
-import Communication from "../communication/Communication";
-import TCPConnection from "../connection/TCPConnection";
-import SerialPortConnection from "../connection/SerialPortConnection";
-import Packet from "../communication/Packet";
-import Header, { Attribute } from "../communication/Header";
-import Response from '../communication/Response';
+import Request, { Callback } from '../communication/Request';
+import BatchBufferInfo from './models/BatchBufferInfo';
+import CoordinateSystemInfo from './models/CoordinateSystemInfo';
+import GcodeFileInfo from './models/GcodeFileInfo';
+import MachineInfo from './models/MachineInfo';
+import MachineSize from './models/MachineSize';
+import ModuleInfo from './models/ModuleInfo';
 
-export type HandlerResponse = {
-    response: Response;
-    packet: Packet;
-}
-
-type Callback = (handlerResponse: HandlerResponse) => void;
-export default class Business extends EventEmitter {
-    communication: Communication;
-
-    handlerMap: Map<number, Callback>;
-
+export default class Business extends Request {
     constructor(type: string, socket: any) {
-        super();
-        if (!socket) {
-            throw new Error('missing socket');
-        }
+        super(type, socket);
+    }
 
-        this.communication = new Communication();
-        this.handlerMap = new Map();
+    subscribeHeartbeat({ interval = 1000 }, callback: Callback) {
+        return this.subscribe(0x01, 0xa0, interval, callback);
+    }
 
-        let connection;
-        if (type === 'tcp') {
-            connection = new TCPConnection(this.communication, socket);
-        } else if (type === 'serialport') {
-            connection = new SerialPortConnection(this.communication, socket);
-        } else {
-            throw new Error('missing type');
-        }
-        this.communication.setConnection(connection);
+    unsubscribeHeartbeat(callback: Callback) {
+        return this.unsubscribe(0x01, 0xa0, callback);
+    }
 
-        this.communication.on('request', (packet) => {
-            this.packetHandler(packet);
+    getModuleInfo() {
+        return this.send(0x01, 0x20, Buffer.alloc(0)).then(({ response, packet }) => {
+            const moduleInfo = ModuleInfo.parseArray(response.data);
+            return { response, packet, moduleInfo };
         });
     }
 
-    // handle request from Controller or Screen
-    private packetHandler(packet: Packet) {
-        console.log(packet)
-        const commandSet = packet.header.commandSet;
-        const commandId = packet.header.commandId;
-        const businessId = commandSet * 256 + commandId;
-        // this is a notification
-        if (commandSet === 0x01 && commandId >= 0xa0) {
-            const response = new Response(packet.payload);
-            this.emit(`${businessId}`, { response, packet } as HandlerResponse);
-        } else if (packet.header.attribute === Attribute.REQUEST) {
-            // a request packet
-            const callback = this.handlerMap.get(businessId);
-            const response = new Response(packet.payload);
-            callback && callback({ response, packet });
-        }
-    }
-
-    setHandler(commandSet: number, commandId: number, callback: Callback) {
-        const businessId = commandSet * 256 + commandId;
-        this.handlerMap.set(businessId, callback);
-    }
-
-    send(commandSet: number, commandId: number, payload: Buffer) {
-        const header = new Header();
-        header.length = payload.byteLength + 8;
-        header.commandSet = commandSet;
-        header.commandId = commandId;
-        header.attribute = Attribute.REQUEST;
-        header.sequence = this.communication.getSequence();
-        header.updateBuffer();
-
-        const packet = new Packet(header, payload);
-        return this.communication.send(packet.toBuffer()).then(packet => {
-            const response = new Response(packet.payload);
-            return { response, packet } as HandlerResponse;
+    getMachineInfo() {
+        return this.send(0x01, 0x21, Buffer.alloc(0)).then(({ response, packet }) => {
+            const machineInfo = new MachineInfo().fromBuffer(response.data);
+            return { response, packet, machineInfo };
         });
     }
 
-    ack(commandSet: number, commandId: number, payload: Buffer) {
-        const header = new Header();
-        header.length = payload.byteLength + 8;
-        header.commandSet = commandSet;
-        header.commandId = commandId;
-        header.attribute = Attribute.ACK;
-        header.sequence = this.communication.getSequence();
-        header.updateBuffer();
-
-        const packet = new Packet(header, payload);
-        return this.communication.send(packet.toBuffer()).then(packet => {
-            const response = new Response(packet.payload);
-            return { response, packet } as HandlerResponse;
-        });;
-    }
-
-    read(buffer: Buffer) {
-        this.communication.connection?.read(buffer);
-    }
-
-    end() {
-        this.communication.connection?.end();
-    }
-
-    subscribe(commandSet: number, commandId: number, interval: number, callback: Callback) {
-        const businessId = commandSet * 256 + commandId;
-
-        const listeners = this.listeners(`${businessId}`);
-        console.log(listeners)
-        if (listeners.length > 0) {
-            this.on(`${businessId}`, callback);
-            return Promise.resolve();
-        } else {
-            this.on(`${businessId}`, callback);
-            const intervalBuffer = Buffer.alloc(2, 0);
-            intervalBuffer.writeUint16LE(interval, 0);
-
-            const payload = Buffer.concat([Buffer.from([commandSet, commandId]), intervalBuffer]);
-            return this.send(0x01, 0x00, payload).catch(() => {
-                callback && this.off(`${businessId}`, callback);
-            });
-        }
-    }
-
-    unsubscribe(commandSet: number, commandId: number, callback: Callback) {
-        const payload = Buffer.from([commandSet, commandId]);
-        return this.send(0x01, 0x01, payload).then(({ response, packet }) => {
-            if (response.result === 0) {
-                const commandSet = packet.header.commandSet;
-                const commandId = packet.header.commandId;
-                const businessId = commandSet * 256 + commandId;
-                this.removeAllListeners(`${businessId}`);
-            }
+    // unimplemented by master control
+    getMachineSize() {
+        return this.send(0x01, 0x22, Buffer.alloc(0)).then(({ response, packet }) => {
+            const machineSize = new MachineSize().fromBuffer(response.data);
+            return { response, packet, machineSize };
         });
     }
 
-    subHeartbeat({ interval = 1000 }, callback: Callback) {
-        this.subscribe(0x01, 0xa0, interval, callback);
+    // refactored by master control, wait for its update
+    getCurrentCoordinateInfo() {
+        return this.send(0x01, 0x30, Buffer.alloc(0)).then(({ response, packet }) => {
+            const coordinateSystemInfo = new CoordinateSystemInfo().fromBuffer(response.data);
+            return { response, packet, coordinateSystemInfo };
+        });
+    }
+
+    startPrint(md5: string, gcodeName: string) {
+        const info = new GcodeFileInfo(md5, gcodeName);
+        return this.send(0xac, 0x03, info.toBuffer()).then(({ response, packet }) => {
+            const batchBufferInfo = new BatchBufferInfo().fromBuffer(response.data);
+            return { response, packet, batchBufferInfo };
+        })
     }
 }

@@ -88,14 +88,24 @@ export function writeFloat(buffer: Buffer, offset: number = 0, value: number) {
 export function readString(buffer: Buffer, offset: number = 0) {
     const bytesToStorelength = 2;
     const strLength = readUint16(buffer, offset);
-    const strBuffer = buffer.slice(offset + bytesToStorelength, offset + strLength);
-    return Buffer.from(strBuffer).toString();
+    const strBuffer = buffer.slice(offset + bytesToStorelength, offset + bytesToStorelength + strLength);
+    return {
+        nextOffset: offset + bytesToStorelength + strLength,
+        result: Buffer.from(strBuffer).toString()
+    };
 }
 
-export function writeString(buffer: Buffer, offset: number = 0, value: string) {
-    const nextOffset = writeUint16(buffer, offset, value.length);
-    const numOfBytes = buffer.write(value, nextOffset);
-    return nextOffset + numOfBytes;
+// export function writeString(buffer: Buffer, offset: number = 0, value: string) {
+//     const nextOffset = writeUint16(buffer, offset, value.length);
+//     const numOfBytes = buffer.write(value, nextOffset);
+//     return nextOffset + numOfBytes;
+// }
+
+export function stringToBuffer(str: string) {
+    const buffer = Buffer.from(str);
+    const lenBuffer = Buffer.alloc(2, 0);
+    writeUint16(lenBuffer, 0, buffer.byteLength);
+    return Buffer.concat([lenBuffer, buffer]);
 }
 
 export function readArray(buffer: Buffer, offset: number = 0) {
