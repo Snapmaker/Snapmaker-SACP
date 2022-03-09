@@ -60,13 +60,13 @@ export default class ModuleInfo implements Serializable {
     }
 
     static parseArray(buffer: Buffer) {
-        const result = [];
-        const arrLength = buffer.readUint8(0);
-        const targetBuffer = buffer.slice(1);
-        for (let i = 0; i < arrLength; i++) {
+        // const result = [];
+        // const arrLength = buffer.readUint8(0);
+        // const targetBuffer = buffer.slice(1);
+        // for (let i = 0; i < arrLength; i++) {
             // const info = targetBuffer.slice(i * ModuleInfo.byteLength, (i + 1) * ModuleInfo.byteLength);
             // result.push(new ModuleInfo().fromBuffer(info));
-        }
-        return result;
+        // }
+        // return result;
     }
 }

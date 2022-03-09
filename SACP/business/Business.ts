@@ -5,6 +5,7 @@ import GcodeFileInfo from './models/GcodeFileInfo';
 import MachineInfo from './models/MachineInfo';
 import MachineSize from './models/MachineSize';
 import ModuleInfo from './models/ModuleInfo';
+import fs from 'fs'
 
 export default class Business extends Request {
     constructor(type: string, socket: any) {
@@ -21,7 +22,10 @@ export default class Business extends Request {
 
     getModuleInfo() {
         return this.send(0x01, 0x20, Buffer.alloc(0)).then(({ response, packet }) => {
-            const moduleInfo = ModuleInfo.parseArray(response.data);
+            console.log(packet?.payload)
+            fs.writeFileSync('./a.txt', packet?.payload!)
+            const moduleInfo = new ModuleInfo();
+            // const moduleInfo = ModuleInfo.parseArray(response.data);
             return { response, packet, moduleInfo };
         });
     }
