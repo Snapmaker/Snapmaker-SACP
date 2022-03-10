@@ -6,7 +6,7 @@ import Packet from '../../SACP/communication/Packet'
 
 chai.use(spies)
 
-xdescribe('communication', () => {
+describe('communication', () => {
     let communication: Communication
     beforeEach(() => {
         communication = new Communication()
@@ -17,26 +17,29 @@ xdescribe('communication', () => {
     })
 
     describe('#receive()', () => {
-        it('a packet for a buffer', () => {
+        it('a packet for a buffer', (done) => {
             const buf = Buffer.from([0xaa, 0x55, 0x0c, 0x00, 0x02, 0x01, 0x18, 0x02, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0xa0, 0xe8, 0x03, 0x5c, 0x13])
             communication.once('request', (packet: Packet) => {
                 assert.deepEqual(buf, packet.toBuffer())
+                done()
             })
             communication.receive(buf)
         })
-        it('a packet for a redundant buffer', () => {
+        it('a packet for a redundant buffer', (done) => {
             const buf = Buffer.from([0xaa, 0x55, 0x08, 0x00, 0x02, 0x01, 0x40, 0x02, 0x00, 0x01, 0x00, 0x01, 0x20, 0xdf, 0xfb])
             const redundantBuf = Buffer.concat([Buffer.from([0xcc, 0xbb]), buf, Buffer.from([0x33, 0x11])])
             communication.once('request', (packet: Packet) => {
                 assert.deepEqual(buf, packet.toBuffer())
+                done()
             })
             communication.receive(redundantBuf)
         })
-        it('a packet for multi buffer', () => {
+        it('a packet for multi buffer', (done) => {
             const buf1 = Buffer.from([0xaa, 0x55, 0x31, 0x00, 0x01, 0x01, 0x70, 0x01, 0x00, 0x01, 0x00, 0x01, 0x21, 0x00, 0x04, 0x01, 0x00, 0x00, 0x00, 0x00, 0x08, 0x00, 0x32, 0x2e, 0x30, 0x2e, 0x39, 0x2e, 0x31, 0x00, 0x00, 0x00])
             const buf2 = Buffer.from([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 0x71])
             communication.once('request', (packet: Packet) => {
                 assert.deepEqual(Buffer.concat([buf1, buf2]), packet.toBuffer())
+                done()
             })
             communication.receive(buf1)
             communication.receive(buf2)

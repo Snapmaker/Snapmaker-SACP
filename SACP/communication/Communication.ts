@@ -63,7 +63,6 @@ export default class Communication extends EventEmitter {
     }
 
     send(buffer: Buffer) {
-        console.log('send', buffer)
         return new Promise<Packet>((resolve, reject) => {
             this.requestHandlerMap.set(globalSequence, {
                 startTime: Date.now(),
@@ -102,7 +101,6 @@ export default class Communication extends EventEmitter {
             }
         } else {
             // receive bytes from next buffer
-            // console.log(this.remainLength, buffer.byteLength)
             if (this.remainLength >= buffer.byteLength) {
                 this.receiveBuffer = Buffer.concat([this.receiveBuffer, buffer.slice(0, buffer.byteLength)]);
                 this.remainLength -= buffer.byteLength;
@@ -126,34 +124,30 @@ export default class Communication extends EventEmitter {
     }
 
     private reolvePacketBuffer() {
-        // console.log(1111, this.receiveBuffer)
         if (this.validateChecksum(this.receiveBuffer)) {
-            // console.log(2221)
             const attribute = this.receiveBuffer.readUInt8(8);
-            // console.log(attribute)
             if (attribute === Attribute.ACK) {
                 const sequence = this.receiveBuffer.readUInt16LE(9);
                 const handler = this.requestHandlerMap.get(sequence);
                 if (handler) {
                     // ACK packet related to request
-                    handler.success(Packet.parse(this.receiveBuffer));
+                    handler.success(new Packet().fromBuffer(this.receiveBuffer));
                     this.requestHandlerMap.delete(sequence);
                 } else {
                     // notification packet
-                    console.log('request ack', this.receiveBuffer)
-                    this.emit('request', Packet.parse(this.receiveBuffer));
+                    this.emit('request', new Packet().fromBuffer(this.receiveBuffer));
                 }
             } else if (attribute === Attribute.REQUEST) {
                 const sequence = this.receiveBuffer.readUInt16LE(9);
                 const handler = this.requestHandlerMap.get(sequence);
                 if (handler) {
                     // ack a sent request, this is wrong, need fix from Master Controller
-                    handler.success(Packet.parse(this.receiveBuffer));
+                    handler.success(new Packet().fromBuffer(this.receiveBuffer));
                     this.requestHandlerMap.delete(sequence);
                 } else {
                     // request packet
-                    console.log('request', this.receiveBuffer)
-                    this.emit('request', Packet.parse(this.receiveBuffer));
+                    console.log(this.receiveBuffer)
+                    this.emit('request', new Packet().fromBuffer(this.receiveBuffer));
                 }
             }
         }
@@ -162,9 +156,7 @@ export default class Communication extends EventEmitter {
 
     private validateChecksum(buffer: Buffer) {
         const checksum = calcChecksum(buffer, 7, buffer.byteLength - 9);
-        // console.log(checksum, buffer, buffer.readUInt16LE(buffer.byteLength - 2))
         if (checksum === buffer.readUInt16LE(buffer.byteLength - 2)) {
-            // console.log(0)
             return true;
         }
         return false;

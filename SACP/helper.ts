@@ -86,10 +86,8 @@ export function writeFloat(buffer: Buffer, offset: number = 0, value: number) {
 }
 
 export function readString(buffer: Buffer, offset: number = 0) {
-    console.log(buffer, offset)
     const bytesToStorelength = 2;
     const strLength = readUint16(buffer, offset);
-    console.log(strLength)
     const strBuffer = buffer.slice(offset + bytesToStorelength, offset + bytesToStorelength + strLength);
     return {
         nextOffset: offset + bytesToStorelength + strLength,

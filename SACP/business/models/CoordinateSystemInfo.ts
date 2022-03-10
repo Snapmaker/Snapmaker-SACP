@@ -1,5 +1,5 @@
-import { readArray, readBool, readUint8 } from '../../helper';
-import { Serializable } from '../Serializable';
+import { readBool, readUint8 } from '../../helper';
+import { Serializable } from '../../Serializable';
 import CoordinateInfo from './CoordinateInfo';
 
 export default class CoordinateSystemInfo implements Serializable {
@@ -31,11 +31,9 @@ export default class CoordinateSystemInfo implements Serializable {
         this.isOriginOffsetCoordinateSystem = readBool(buffer, 2);
 
         const coordinatesBuffer = buffer.slice(3);
-        console.log('coordinatesBuffer', coordinatesBuffer)
         this.coordinates = CoordinateInfo.parseArray(coordinatesBuffer);
 
         const originOffsetBuffer = buffer.slice(this.coordinates.length * CoordinateInfo.byteLength + 3);
-        console.log('originOffsetBuffer', originOffsetBuffer)
         this.originOffset = CoordinateInfo.parseArray(originOffsetBuffer);
         return this;
     }

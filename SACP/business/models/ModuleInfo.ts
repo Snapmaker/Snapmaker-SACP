@@ -1,7 +1,7 @@
 // https://snapmaker2.atlassian.net/wiki/spaces/SNAP/pages/1984824794/Re?focusedCommentId=2001966795#Data-Format.1
 
 import { readString, readUint16, readUint32, readUint8 } from '../../helper';
-import { Serializable } from '../Serializable';
+import { Serializable } from '../../Serializable';
 
 enum FMDIndex {
     LEFT, RIGHT
@@ -73,7 +73,6 @@ export default class ModuleInfo implements Serializable {
             const moduleInfo = new ModuleInfo().fromBuffer(info);
             result.push(moduleInfo);
             byteLength += moduleInfo.getByteLength();
-            console.log(byteLength)
         }
         return result;
     }

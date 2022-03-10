@@ -1,4 +1,4 @@
-import { calcCRC8, readUint16, readUint8, writeSOF, writeUint16, writeUint8 } from '../helper';
+import { calcCRC8, readSOF, readUint16, readUint8, writeSOF, writeUint16, writeUint8 } from '../helper';
 
 export enum PeerId {
     LUBAN, CONTROLLER, SCREEN
@@ -64,7 +64,7 @@ export default class Header {
     }
 
     parse(buffer: Buffer) {
-        this.sof = readUint16(buffer, 0);
+        this.sof = readSOF(buffer, 0);
         this.length = readUint16(buffer, 2);
         this.version = readUint8(buffer, 4);
         this.receiverId = readUint8(buffer, 5);

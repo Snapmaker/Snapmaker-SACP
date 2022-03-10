@@ -1,22 +1,21 @@
-import Request, { Callback } from '../communication/Request';
+import Dispatcher, { ResponseCallback } from '../communication/Dispatcher';
 import BatchBufferInfo from './models/BatchBufferInfo';
 import CoordinateSystemInfo from './models/CoordinateSystemInfo';
 import GcodeFileInfo from './models/GcodeFileInfo';
 import MachineInfo from './models/MachineInfo';
 import MachineSize from './models/MachineSize';
 import ModuleInfo from './models/ModuleInfo';
-import fs from 'fs'
 
-export default class Business extends Request {
+export default class Business extends Dispatcher {
     constructor(type: string, socket: any) {
         super(type, socket);
     }
 
-    subscribeHeartbeat({ interval = 1000 }, callback: Callback) {
+    subscribeHeartbeat({ interval = 1000 }, callback: ResponseCallback) {
         return this.subscribe(0x01, 0xa0, interval, callback);
     }
 
-    unsubscribeHeartbeat(callback: Callback) {
+    unsubscribeHeartbeat(callback: ResponseCallback) {
         return this.unsubscribe(0x01, 0xa0, callback);
     }
 
@@ -50,11 +49,23 @@ export default class Business extends Request {
         });
     }
 
+    requestHome() {
+        return this.send(0x01, 0x35, Buffer.alloc(1, 0)).then(({ response, packet }) => {
+            return { response, packet };
+        })
+    }
+
     startPrint(md5: string, gcodeName: string) {
         const info = new GcodeFileInfo(md5, gcodeName);
         return this.send(0xac, 0x03, info.toBuffer()).then(({ response, packet }) => {
             const batchBufferInfo = new BatchBufferInfo().fromBuffer(response.data);
             return { response, packet, batchBufferInfo };
+        })
+    }
+
+    stopPrint() {
+        return this.send(0xac, 0x06, Buffer.alloc(0)).then(({ response, packet }) => {
+            return { response, packet };
         })
     }
 }

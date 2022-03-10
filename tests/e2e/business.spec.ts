@@ -3,7 +3,8 @@ import SerialPort from 'serialport'
 import Business from '../../SACP/business/Business'
 import BatchBufferInfo from '../../SACP/business/models/BatchBufferInfo'
 import PrintBatchGcode from '../../SACP/business/models/PrintBatchGcode'
-import { Callback } from '../../SACP/communication/Request'
+import { RequestParam, ResponseCallback } from '../../SACP/communication/Dispatcher'
+import Response from '../../SACP/communication/Response'
 
 describe('business', () => {
     let serialport: SerialPort
@@ -32,11 +33,9 @@ describe('business', () => {
         assert.notEqual(business, undefined)
     })
 
-    xit('subscribe() & unsubscribe() should work', function(done) {
-        const callback: Callback = ({ response, packet }) => {
-            assert.equal(response.result, 0)
-            const systemStatus = response.data.readUint8(0)
-            assert.equal(systemStatus, 0) // idle
+    it('subscribe() & unsubscribe() should work', function(done) {
+        const callback: ResponseCallback = ({ response, packet }) => {
+            console.log('heartbeat...')
         }
 
         business.subscribeHeartbeat({
@@ -51,46 +50,70 @@ describe('business', () => {
                     assert.equal(response.result, 0)
                     done()
                 })
-            }, 1000)
+            }, 600)
         })
     })
 
-    it('getModuleInfo() should work', (done) => {
-        business.getModuleInfo().then(res => {
-            assert.equal(res.response.result, 0)
-            console.log(res.moduleInfo)
-            done()
+    describe('query', () => {
+        it('getModuleInfo() should work', (done) => {
+            business.getModuleInfo().then(res => {
+                assert.equal(res.response.result, 0)
+                done()
+            })
+        })
+    
+        xit('getCurrentCoordinateInfo() should work', (done) => {
+            business.getCurrentCoordinateInfo().then(res => {
+                assert.equal(res.response.result, 0)
+                done()
+            })
+        })
+    
+        it('getMachineInfo() should work', (done) => {
+            business.getMachineInfo().then(res => {
+                assert.equal(res.response.result, 0)
+                done()
+            })
         })
     })
 
-    xit('getCurrentCoordinateInfo() should work', (done) => {
-        business.getCurrentCoordinateInfo().then(res => {
-            assert.equal(res.response.result, 0)
-            console.log(res.coordinateSystemInfo)
-            done()
+    describe('print', () => {
+        it('stopPrint() should work', function(done) {
+            this.timeout(10000)
+            business.stopPrint().then(({ response }) => {
+                assert.equal(response.result, 0)
+                done()
+            })
+        })
+        it('requestHome() should work', function(done) {
+            this.timeout(10000)
+            business.requestHome().then(({ response }) => {
+                assert.equal(response.result, 0)
+                done()
+            })
+        })
+        it('startPrint() should work', function(done) {
+            this.timeout(10000)
+            business.setHandler(0xac, 0x02, ({ param, packet }: RequestParam) => {
+                const batchBufferInfo = new BatchBufferInfo().fromBuffer(param);
+                console.log(batchBufferInfo);
+                let content = ''
+                if (batchBufferInfo.lineNumber === 0) {
+                    content = 'G28\n';
+                }
+                const printBatchGcode = new PrintBatchGcode(batchBufferInfo.lineNumber, batchBufferInfo.lineNumber, content);
+                const res = new Response(0, printBatchGcode.toBuffer())
+                business.ack(0xac, 0x02, packet, res.toBuffer());
+                if (!content) {
+                    done()
+                }
+            });
+            business.startPrint('0511f187b7b572dc82d1323f660e5472', 'index.gcode')
+            .then(({ response, batchBufferInfo }) => {
+                console.log(response, batchBufferInfo)
+                // assert.equal(response.result, 0)
+            })
         })
     })
 
-    xit('getMachineInfo() should work', (done) => {
-        business.getMachineInfo().then(res => {
-            assert.equal(res.response.result, 0)
-            // console.log(res.machineInfo)
-            done()
-        })
-    })
-
-    xit('startPrint() should work', () => {
-        business.setHandler(0xac, 0x02, ({ response }) => {
-            const batchBufferInfo = new BatchBufferInfo().fromBuffer(response.data);
-            console.log(batchBufferInfo);
-
-            const printBatchGcode = new PrintBatchGcode(0, 1, 'G28\n');
-            business.ack(0xac, 0x02, printBatchGcode.toBuffer());
-            assert.equal(response.result, 0)
-        });
-        business.startPrint('0511f187b7b572dc82d1323f660e5472', 'index.ts')
-        .then(({ response }) => {
-            assert.equal(response.result, 0)
-        })
-    })
 })

@@ -1,17 +1,25 @@
+import { Serializable } from '../Serializable';
 import { calcChecksum } from '../helper';
 import Header from './Header';
 
-export default class Packet {
+export default class Packet implements Serializable {
     header: Header;
 
     payload: Buffer;
 
     checksum: Buffer;
 
-    constructor(header: Header, payload: Buffer, checksum?: Buffer) {
-        this.header = header;
-        this.payload = payload;
+    constructor(header?: Header, payload?: Buffer, checksum?: Buffer) {
+        this.header = header ?? new Header();
+        this.payload = payload ?? Buffer.alloc(0);
         this.checksum = checksum ?? Buffer.alloc(2, 0);
+    }
+
+    fromBuffer(buffer: Buffer) {
+        this.header = new Header().parse(buffer.slice(0, 13));
+        this.payload = buffer.slice(13, buffer.length - 2);
+        this.checksum = buffer.slice(buffer.length - 2);
+        return this;
     }
 
     toBuffer() {
@@ -20,12 +28,5 @@ export default class Packet {
         this.checksum = Buffer.alloc(2, 0);
         this.checksum.writeUint16LE(checksumNumber, 0);
         return Buffer.concat([buffer, this.checksum]);
-    }
-
-    static parse(buffer: Buffer) {
-        const header = new Header().parse(buffer.slice(0, 13));
-        const payload = buffer.slice(13, buffer.length - 2);
-        const checksum = buffer.slice(buffer.length - 2);
-        return new Packet(header, payload, checksum);
     }
 }

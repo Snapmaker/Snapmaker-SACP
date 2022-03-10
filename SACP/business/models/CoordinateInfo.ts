@@ -1,20 +1,30 @@
-import { readUint32, readUint8 } from '../../helper';
+import { readFloat, readUint32, readUint8 } from '../../helper';
+import { Serializable } from '../../Serializable';
 
 enum Direction {
     X1, Y1, Z1, A1, B1, C1, X2
 }
 
-export default class CoordinateInfo {
+export default class CoordinateInfo implements Serializable {
     static byteLength: number = 5;
 
     key: Direction;
 
     value: number;
 
-    constructor(buffer: Buffer) {
-        console.log(buffer)
+    constructor(key?: Direction, value?: number) {
+        this.key = key ?? Direction.X1;
+        this.value = value ?? 0.0;
+    }
+
+    toBuffer(): Buffer {
+        throw new Error('Method not implemented.');
+    }
+
+    fromBuffer(buffer: Buffer) {
         this.key = readUint8(buffer) as Direction;
-        this.value = readUint32(buffer, 1) / 1000;
+        this.value = readFloat(buffer, 1);
+        return this;
     }
 
     static parseArray(buffer: Buffer): CoordinateInfo[] {
@@ -23,7 +33,7 @@ export default class CoordinateInfo {
         const targetBuffer = buffer.slice(1);
         for (let i = 0; i < arrLength; i++) {
             const info = targetBuffer.slice(i * CoordinateInfo.byteLength, (i + 1) * CoordinateInfo.byteLength);
-            result.push(new CoordinateInfo(info));
+            result.push(new CoordinateInfo().fromBuffer(info));
         }
         return result;
     }

@@ -4,7 +4,7 @@ import Communication from '../../SACP/communication/Communication';
 import Packet from '../../SACP/communication/Packet';
 import TCPConnection from '../../SACP/connection/TCPConnection';
 
-xdescribe('communication', () => {
+describe('communication', () => {
     let communication: Communication;
     let server: net.Server;
     let client: net.Socket;
@@ -40,18 +40,20 @@ xdescribe('communication', () => {
         server.close()
     })
 
-    it('should receive packet', () => {
+    it('should receive packet', (done) => {
         const buf = Buffer.from([0xaa, 0x55, 0x0c, 0x00, 0x02, 0x01, 0x18, 0x02, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0xa0, 0xe8, 0x03, 0x5c, 0x13])
         communication.once('request', (packet: Packet) => {
             assert.deepEqual(buf, packet.toBuffer(), 'receive wrong packet');
+            done()
         })
         client.write(buf)
     })
 
-    it('should send packet', () => {
+    it('should send packet', (done) => {
         const buf = Buffer.from([0xaa, 0x55, 0x0c, 0x00, 0x02, 0x01, 0x18, 0x02, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0xa0, 0xe8, 0x03, 0x5c, 0x13])
         client.once('data', (data) => {
             assert.deepEqual(buf, data, 'send wrong buffer')
+            done()
         })
         communication.send(buf)
     })

@@ -1,5 +1,5 @@
 import { readArray } from '../../helper';
-import { Serializable } from '../Serializable';
+import { Serializable } from '../../Serializable';
 import CoordinateInfo from './CoordinateInfo';
 
 export default class MachineSize implements Serializable {
@@ -17,7 +17,6 @@ export default class MachineSize implements Serializable {
     }
 
     fromBuffer(buffer: Buffer) {
-        console.log('from buffer', buffer)
         const axisLengthBuffer = readArray(buffer, 0);
         this.axisLength = CoordinateInfo.parseArray(axisLengthBuffer);
 

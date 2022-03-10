@@ -1,5 +1,5 @@
-import { stringToBuffer, writeUint32 } from "../../helper";
-import { Serializable } from "../Serializable";
+import { readString, readUint32, stringToBuffer, writeUint32 } from "../../helper";
+import { Serializable } from "../../Serializable";
 
 export default class PrintBatchGcode implements Serializable {
     startLineNumber: number;
@@ -22,6 +22,9 @@ export default class PrintBatchGcode implements Serializable {
     }
 
     fromBuffer(buffer: Buffer) {
-        throw new Error("Method not implemented.");
+        this.startLineNumber = readUint32(buffer, 0);
+        this.endLineNumber = readUint32(buffer, 4);
+        this.gcodeBatch = readString(buffer, 8).result;
+        return this;
     }
 }

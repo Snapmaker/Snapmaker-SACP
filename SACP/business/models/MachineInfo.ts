@@ -1,5 +1,5 @@
 import { readString, readUint32, readUint8 } from '../../helper';
-import { Serializable } from '../Serializable';
+import { Serializable } from '../../Serializable';
 
 enum MachineType {
     A150, A250, A350, A400, J1
