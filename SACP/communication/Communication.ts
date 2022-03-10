@@ -146,7 +146,6 @@ export default class Communication extends EventEmitter {
                     this.requestHandlerMap.delete(sequence);
                 } else {
                     // request packet
-                    console.log(this.receiveBuffer)
                     this.emit('request', new Packet().fromBuffer(this.receiveBuffer));
                 }
             }

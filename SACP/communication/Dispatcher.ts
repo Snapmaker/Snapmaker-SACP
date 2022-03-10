@@ -11,13 +11,13 @@ export type ResponseData = {
     packet: Packet;
 }
 
-export type RequestParam = {
+export type RequestData = {
     param: Buffer,
     packet: Packet
 }
 
 export type ResponseCallback = (data: ResponseData) => void;
-export type RequestCallback = (data: RequestParam) => void;
+export type RequestCallback = (data: RequestData) => void;
 
 export default class Dispatcher extends EventEmitter {
     communication: Communication | null;
@@ -66,7 +66,6 @@ export default class Dispatcher extends EventEmitter {
         } else if (packet.header.attribute === Attribute.REQUEST) {
             // a request packet
             const callback = this.handlerMap.get(businessId);
-            // console.log(callback, packet)
             callback && callback({ param: packet.payload, packet });
         }
     }
@@ -104,7 +103,6 @@ export default class Dispatcher extends EventEmitter {
             header.sequence = requestPacket.header.sequence;
     
             const packet = new Packet(header, payload);
-            console.log('ack', packet.toBuffer())
             return this.communication.send(packet.toBuffer()).then(packet => {
                 const response = new Response().fromBuffer(packet.payload);
                 return { response, packet } as ResponseData;
