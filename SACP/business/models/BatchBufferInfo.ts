@@ -18,10 +18,8 @@ export default class BatchBufferInfo implements Serializable {
         return buffer;
     }
     fromBuffer(buffer: Buffer) {
-        if (buffer.length > 0) {
-            this.lineNumber = readUint32(buffer, 0);
-            this.batchBufferLength = readUint16(buffer, 4);
-        }
+        this.lineNumber = readUint32(buffer, 0);
+        this.batchBufferLength = readUint16(buffer, 4);
         return this;
     }
 }

@@ -14,12 +14,11 @@ export default class GcodeFileInfo implements Serializable {
     toBuffer(): Buffer {
         return Buffer.concat([stringToBuffer(this.md5), stringToBuffer(this.gcodeName)]);
     }
+
     fromBuffer(buffer: Buffer) {
-        if (buffer.length > 0) {
-            const { nextOffset, result: md5 } = readString(buffer, 0)
-            this.md5 = md5;
-            this.gcodeName = readString(buffer, nextOffset).result;
-        }
+        const { nextOffset, result: md5 } = readString(buffer, 0)
+        this.md5 = md5;
+        this.gcodeName = readString(buffer, nextOffset).result;
         return this;
     }
 }

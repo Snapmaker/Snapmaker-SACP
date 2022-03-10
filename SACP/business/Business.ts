@@ -22,10 +22,7 @@ export default class Business extends Request {
 
     getModuleInfo() {
         return this.send(0x01, 0x20, Buffer.alloc(0)).then(({ response, packet }) => {
-            console.log(packet?.payload)
-            fs.writeFileSync('./a.txt', packet?.payload!)
-            const moduleInfo = new ModuleInfo();
-            // const moduleInfo = ModuleInfo.parseArray(response.data);
+            const moduleInfo = ModuleInfo.parseArray(response.data);
             return { response, packet, moduleInfo };
         });
     }

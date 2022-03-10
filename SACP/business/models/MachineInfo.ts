@@ -26,12 +26,10 @@ export default class MachineInfo implements Serializable {
     }
 
     fromBuffer(buffer: Buffer) {
-        if (buffer.length > 0) {
-            this.type = readUint8(buffer, 0);
-            this.masterControlHardwareVersion = readUint8(buffer, 1);
-            this.masterControlSerialNumber = readUint32(buffer, 2);
-            this.masterControlFirmwareVersion = readString(buffer, 6).result;
-        }
+        this.type = readUint8(buffer, 0);
+        this.masterControlHardwareVersion = readUint8(buffer, 1);
+        this.masterControlSerialNumber = readUint32(buffer, 2);
+        this.masterControlFirmwareVersion = readString(buffer, 6).result;
         return this;
     }
 }
