@@ -3,7 +3,7 @@ import SerialPort from 'serialport'
 import Business from '../../SACP/business/Business'
 import BatchBufferInfo from '../../SACP/business/models/BatchBufferInfo'
 import PrintBatchGcode from '../../SACP/business/models/PrintBatchGcode'
-import { Callback, HandlerResponse } from '../../SACP/communication/Request'
+import { Callback } from '../../SACP/communication/Request'
 
 describe('business', () => {
     let serialport: SerialPort
@@ -32,32 +32,30 @@ describe('business', () => {
         assert.notEqual(business, undefined)
     })
 
-    it('subscribe() & unsubscribe() should work', function(done) {
-        // aa 55 0a 00 01 01 53 01 00 90 a0 01 a0 00 00 bf 6c
+    xit('subscribe() & unsubscribe() should work', function(done) {
+        const callback: Callback = ({ response, packet }) => {
+            assert.equal(response.result, 0)
+            const systemStatus = response.data.readUint8(0)
+            assert.equal(systemStatus, 0) // idle
+        }
+
         business.subscribeHeartbeat({
             interval: 500
-        }, function ({ response, packet }) {
-            done()
+        }, callback)
+        .then(({ response }) => {
             assert.equal(response.result, 0)
-            const systemStatus = response.data
-            assert.equal(systemStatus, 0) // idle
-            console.log(response)
         })
-        // .then(({ response }) => {
-        //     assert.equal(response.result, 0)
-            // done()
-        // })
-        // .then(() => {
-        //     setTimeout(() => {
-        //         business.unsubscribeHeartbeat(cb).then(({ response }) => {
-        //             assert.equal(response.result, 0)
-        //             done()
-        //         })
-        //     }, 5000)
-        // })
+        .then(() => {
+            setTimeout(() => {
+                business.unsubscribeHeartbeat(callback).then(({ response }) => {
+                    assert.equal(response.result, 0)
+                    done()
+                })
+            }, 1000)
+        })
     })
 
-    xit('getModuleInfo() should work', (done) => {
+    it('getModuleInfo() should work', (done) => {
         business.getModuleInfo().then(res => {
             assert.equal(res.response.result, 0)
             console.log(res.moduleInfo)
