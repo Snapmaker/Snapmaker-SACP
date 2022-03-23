@@ -7,10 +7,6 @@ import MachineSize from './models/MachineSize';
 import ModuleInfo from './models/ModuleInfo';
 
 export default class Business extends Dispatcher {
-    constructor(type: string, socket: any) {
-        super(type, socket);
-    }
-
     subscribeHeartbeat({ interval = 1000 }, callback: ResponseCallback) {
         return this.subscribe(0x01, 0xa0, interval, callback);
     }
@@ -52,7 +48,7 @@ export default class Business extends Dispatcher {
     requestHome() {
         return this.send(0x01, 0x35, Buffer.alloc(1, 0)).then(({ response, packet }) => {
             return { response, packet };
-        })
+        });
     }
 
     startPrint(md5: string, gcodeName: string) {
@@ -60,12 +56,12 @@ export default class Business extends Dispatcher {
         return this.send(0xac, 0x03, info.toBuffer()).then(({ response, packet }) => {
             const batchBufferInfo = new BatchBufferInfo().fromBuffer(response.data);
             return { response, packet, batchBufferInfo };
-        })
+        });
     }
 
     stopPrint() {
         return this.send(0xac, 0x06, Buffer.alloc(0)).then(({ response, packet }) => {
             return { response, packet };
-        })
+        });
     }
 }

@@ -1,5 +1,5 @@
 import { Serializable } from '../Serializable';
-import { calcChecksum } from '../helper';
+import { calcChecksum, writeUint16 } from '../helper';
 import Header from './Header';
 
 export default class Packet implements Serializable {
@@ -26,7 +26,7 @@ export default class Packet implements Serializable {
         const buffer = Buffer.concat([this.header.toBuffer(), this.payload]);
         const checksumNumber = calcChecksum(buffer, 7, buffer.byteLength - 7);
         this.checksum = Buffer.alloc(2, 0);
-        this.checksum.writeUint16LE(checksumNumber, 0);
+        writeUint16(this.checksum, 0, checksumNumber);
         return Buffer.concat([buffer, this.checksum]);
     }
 }

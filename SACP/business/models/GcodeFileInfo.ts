@@ -16,7 +16,7 @@ export default class GcodeFileInfo implements Serializable {
     }
 
     fromBuffer(buffer: Buffer) {
-        const { nextOffset, result: md5 } = readString(buffer, 0)
+        const { nextOffset, result: md5 } = readString(buffer, 0);
         this.md5 = md5;
         this.gcodeName = readString(buffer, nextOffset).result;
         return this;

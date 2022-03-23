@@ -32,7 +32,7 @@ export default class ModuleInfo implements Serializable {
     moduleFirmwareVersion: string;
 
     constructor(
-        key?: number, moduleId?: number, moduleIndex?: ModuleIndex, moduleState?: ModuleState, 
+        key?: number, moduleId?: number, moduleIndex?: ModuleIndex, moduleState?: ModuleState,
         serialNumber?: number, hardwareVersion?: number, moduleFirmwareVersion?: string
     ) {
         this.key = key ?? 0;
@@ -65,7 +65,7 @@ export default class ModuleInfo implements Serializable {
 
     static parseArray(buffer: Buffer) {
         const result = [];
-        const arrLength = buffer.readUint8(0);
+        const arrLength = readUint8(buffer, 0);
         const targetBuffer = buffer.slice(1);
         let byteLength = 0;
         for (let i = 0; i < arrLength; i++) {

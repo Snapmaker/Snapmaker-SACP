@@ -1,10 +1,11 @@
-import EventEmitter from "events";
-import Communication from "../communication/Communication";
-import TCPConnection from "../connection/TCPConnection";
-import SerialPortConnection from "../connection/SerialPortConnection";
-import Packet from "../communication/Packet";
-import Header, { Attribute } from "../communication/Header";
-import Response from '../communication/Response';
+import EventEmitter from 'events';
+import Communication from './Communication';
+import TCPConnection from '../connection/TCPConnection';
+import SerialPortConnection from '../connection/SerialPortConnection';
+import Packet from './Packet';
+import Header, { Attribute } from './Header';
+import Response from './Response';
+import { writeUint16 } from '../helper';
 
 export type ResponseData = {
     response: Response;
@@ -49,8 +50,10 @@ export default class Dispatcher extends EventEmitter {
     }
 
     dispose() {
-        this.communication?.dispose();
-        this.communication = null;
+        if (this.communication) {
+            this.communication.dispose();
+            this.communication = null;
+        }
         this.handlerMap.clear();
     }
 
@@ -83,14 +86,14 @@ export default class Dispatcher extends EventEmitter {
             header.commandId = commandId;
             header.attribute = Attribute.REQUEST;
             header.sequence = this.communication.getSequence();
-    
+
             const packet = new Packet(header, payload);
-            return this.communication.send(packet.toBuffer()).then(packet => {
-                const response = new Response().fromBuffer(packet.payload);
-                return { response, packet } as ResponseData;
+            return this.communication.send(packet.toBuffer()).then(resPacket => {
+                const response = new Response().fromBuffer(resPacket.payload);
+                return { response, packet: resPacket } as ResponseData;
             });
         }
-        return Promise.reject(new Error('communication not initialize'))
+        return Promise.reject(new Error('communication not initialize'));
     }
 
     ack(commandSet: number, commandId: number, requestPacket: Packet, payload: Buffer) {
@@ -101,22 +104,26 @@ export default class Dispatcher extends EventEmitter {
             header.commandId = commandId;
             header.attribute = Attribute.ACK;
             header.sequence = requestPacket.header.sequence;
-    
+
             const packet = new Packet(header, payload);
-            return this.communication.send(packet.toBuffer()).then(packet => {
-                const response = new Response().fromBuffer(packet.payload);
-                return { response, packet } as ResponseData;
-            });;
+            return this.communication.send(packet.toBuffer()).then(resPacket => {
+                const response = new Response().fromBuffer(resPacket.payload);
+                return { response, packet: resPacket } as ResponseData;
+            });
         }
-        return Promise.reject(new Error('communication not initialize'))
+        return Promise.reject(new Error('communication not initialize'));
     }
 
     read(buffer: Buffer) {
-        this.communication?.connection?.read(buffer);
+        if (this.communication && this.communication.connection) {
+            this.communication.connection.read(buffer);
+        }
     }
 
     end() {
-        this.communication?.connection?.end();
+        if (this.communication && this.communication.connection) {
+            this.communication.connection.end();
+        }
     }
 
     subscribe(commandSet: number, commandId: number, interval: number, callback: ResponseCallback) {
@@ -130,7 +137,7 @@ export default class Dispatcher extends EventEmitter {
             } as ResponseData);
         } else {
             const intervalBuffer = Buffer.alloc(2, 0);
-            intervalBuffer.writeUint16LE(interval, 0);
+            writeUint16(intervalBuffer, 0, interval);
 
             const payload = Buffer.concat([Buffer.from([commandSet, commandId]), intervalBuffer]);
             return this.send(0x01, 0x00, payload).then((res) => {
@@ -146,9 +153,7 @@ export default class Dispatcher extends EventEmitter {
         const payload = Buffer.from([commandSet, commandId]);
         return this.send(0x01, 0x01, payload).then((res) => {
             if (res.response?.result === 0) {
-                const commandSet = res.packet.header.commandSet;
-                const commandId = res.packet.header.commandId;
-                const businessId = `${commandSet * 256 + commandId}`;
+                const businessId = `${res.packet.header.commandSet * 256 + res.packet.header.commandId}`;
                 if (this.listenerCount(businessId) > 1) {
                     this.removeListener(businessId, callback);
                 } else {

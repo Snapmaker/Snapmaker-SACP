@@ -34,8 +34,6 @@ export default class Header {
 
     commandId: number = 0;
 
-    constructor() {}
-
     static updateDefaultReceiverId(id: PeerId) {
         defaultReceiverId = id;
     }

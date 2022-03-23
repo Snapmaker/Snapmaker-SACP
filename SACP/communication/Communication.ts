@@ -25,10 +25,6 @@ export default class Communication extends EventEmitter {
 
     public connection: ConnectionInterface | null = null;
 
-    constructor() {
-        super();
-    }
-
     dispose() {
         this.receiveBuffer = Buffer.alloc(0);
         this.receiving = false;
@@ -58,7 +54,7 @@ export default class Communication extends EventEmitter {
 
     getSequence() {
         globalSequence++;
-        globalSequence %= 0xffff; 
+        globalSequence %= 0xffff;
         return globalSequence;
     }
 
@@ -79,13 +75,13 @@ export default class Communication extends EventEmitter {
     receive(buffer: Buffer) {
         if (!this.receiving) {
             for (let i = 0; i < buffer.byteLength - 1; i++) {
-                if (buffer[i] === 0xaa && buffer[i + 1] == 0x55) {
+                if (buffer[i] === 0xaa && buffer[i + 1] === 0x55) {
                     const crc8 = calcCRC8(buffer, i, 6);
                     if (crc8 === buffer[i + 6]) {
                         this.receiving = true;
                         const length = buffer.readUInt16LE(i + 2);
                         if (i + 7 + length <= buffer.byteLength) {
-                            this.receiveBuffer = Buffer.concat([this.receiveBuffer, buffer.slice(i, i + 7 + length)])
+                            this.receiveBuffer = Buffer.concat([this.receiveBuffer, buffer.slice(i, i + 7 + length)]);
                             this.remainLength = 0;
                             this.receiving = false;
                             this.reolvePacketBuffer();
@@ -93,7 +89,7 @@ export default class Communication extends EventEmitter {
                             continue;
                         } else {
                             this.remainLength = length - (buffer.byteLength - i) + 7;
-                            this.receiveBuffer = Buffer.concat([this.receiveBuffer, buffer.slice(i, buffer.byteLength)])
+                            this.receiveBuffer = Buffer.concat([this.receiveBuffer, buffer.slice(i, buffer.byteLength)]);
                             break;
                         }
                     }

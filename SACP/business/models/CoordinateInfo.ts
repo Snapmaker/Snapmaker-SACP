@@ -1,4 +1,4 @@
-import { readFloat, readUint32, readUint8 } from '../../helper';
+import { readFloat, readUint8 } from '../../helper';
 import { Serializable } from '../../Serializable';
 
 enum Direction {
@@ -29,7 +29,7 @@ export default class CoordinateInfo implements Serializable {
 
     static parseArray(buffer: Buffer): CoordinateInfo[] {
         const result = [];
-        const arrLength = buffer.readUint8(0);
+        const arrLength = readUint8(buffer, 0);
         const targetBuffer = buffer.slice(1);
         for (let i = 0; i < arrLength; i++) {
             const info = targetBuffer.slice(i * CoordinateInfo.byteLength, (i + 1) * CoordinateInfo.byteLength);
