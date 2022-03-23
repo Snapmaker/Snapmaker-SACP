@@ -3,7 +3,7 @@ import SerialPort from 'serialport'
 import Business from '../../SACP/business/Business'
 import BatchBufferInfo from '../../SACP/business/models/BatchBufferInfo'
 import PrintBatchGcode from '../../SACP/business/models/PrintBatchGcode'
-import { RequestParam, ResponseCallback } from '../../SACP/communication/Dispatcher'
+import { RequestData, ResponseCallback } from '../../SACP/communication/Dispatcher'
 import Response from '../../SACP/communication/Response'
 
 describe('business', () => {
@@ -94,7 +94,7 @@ describe('business', () => {
         })
         it('startPrint() should work', function(done) {
             this.timeout(10000)
-            business.setHandler(0xac, 0x02, ({ param, packet }: RequestParam) => {
+            business.setHandler(0xac, 0x02, ({ param, packet }: RequestData) => {
                 const batchBufferInfo = new BatchBufferInfo().fromBuffer(param);
                 console.log(batchBufferInfo);
                 let content = ''
