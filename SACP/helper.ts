@@ -108,19 +108,6 @@ export function stringToBuffer(str: string) {
     return Buffer.concat([lenBuffer, buffer]);
 }
 
-export function readArray(buffer: Buffer, offset: number = 0) {
-    const bytesToStorelength = 1;
-    const arrLength = readUint8(buffer, offset);
-    const arrBuffer = buffer.slice(offset + bytesToStorelength, offset + arrLength);
-    return arrBuffer;
-}
-
-export function writeArray(buffer: Buffer, offset: number = 0, value: Buffer) {
-    const nextOffset = writeUint8(buffer, offset, value.byteLength);
-    buffer.fill(value, nextOffset);
-    return nextOffset + value.byteLength;
-}
-
 export function readSOF(buffer: Buffer, offset: number = 0) {
     return buffer.readUInt16BE(offset); // notice, there is an exception
 }
