@@ -41,17 +41,17 @@ describe('business', () => {
         business.subscribeHeartbeat({
             interval: 500
         }, callback)
-        .then(({ response }) => {
-            assert.equal(response.result, 0)
-        })
-        .then(() => {
-            setTimeout(() => {
-                business.unsubscribeHeartbeat(callback).then(({ response }) => {
-                    assert.equal(response.result, 0)
-                    done()
-                })
-            }, 600)
-        })
+            .then(({ response }) => {
+                assert.equal(response.result, 0)
+            })
+            .then(() => {
+                setTimeout(() => {
+                    business.unsubscribeHeartbeat(callback).then(({ response }) => {
+                        assert.equal(response.result, 0)
+                        done()
+                    })
+                }, 600)
+            })
     })
 
     describe('query', () => {
@@ -61,14 +61,14 @@ describe('business', () => {
                 done()
             })
         })
-    
+
         xit('getCurrentCoordinateInfo() should work', (done) => {
             business.getCurrentCoordinateInfo().then(res => {
                 assert.equal(res.response.result, 0)
                 done()
             })
         })
-    
+
         it('getMachineInfo() should work', (done) => {
             business.getMachineInfo().then(res => {
                 assert.equal(res.response.result, 0)
@@ -109,10 +109,10 @@ describe('business', () => {
                 }
             });
             business.startPrint('0511f187b7b572dc82d1323f660e5472', 'index.gcode')
-            .then(({ response, batchBufferInfo }) => {
-                console.log(response, batchBufferInfo)
-                // assert.equal(response.result, 0)
-            })
+                .then(({ response, batchBufferInfo }) => {
+                    console.log(response, batchBufferInfo)
+                    // assert.equal(response.result, 0)
+                })
         })
     })
 
