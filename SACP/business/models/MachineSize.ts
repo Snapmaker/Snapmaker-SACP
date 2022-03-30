@@ -1,4 +1,4 @@
-import { readUint8 } from '../../helper';
+import { readArray } from '../../helper';
 import { Serializable } from '../../Serializable';
 import CoordinateInfo from './CoordinateInfo';
 
@@ -17,15 +17,10 @@ export default class MachineSize implements Serializable {
     }
 
     fromBuffer(buffer: Buffer) {
-        this.axisLength = CoordinateInfo.parseArray(buffer);
+        const axisLengthBuffer = readArray(buffer, 0);
+        this.axisLength = CoordinateInfo.parseArray(axisLengthBuffer);
 
-        const arrLength = readUint8(buffer, 0);
-        buffer = buffer.slice(arrLength * CoordinateInfo.byteLength + 1);
-
-        this.homeOffset = CoordinateInfo.parseArray(buffer);
-        return {
-            axisLength: this.axisLength,
-            homeOffset: this.homeOffset
-        }
+        const homeOffsetBuffer = readArray(buffer, axisLengthBuffer.byteLength);
+        this.homeOffset = CoordinateInfo.parseArray(homeOffsetBuffer);
     }
 }
