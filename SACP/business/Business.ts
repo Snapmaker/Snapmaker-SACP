@@ -9,6 +9,7 @@ import MovementInstruction, { MoveDirection } from './models/MovementInstruction
 import LaserCalibration from './models/LaserCalibration'
 import SetLaserPower from './models/SetLaserPower';
 import { readString, readUint32, stringToBuffer, writeFloat, writeInt8, writeUint32, writeUint8 } from '../helper';
+import Laserinfo from './models/LaserInfo'
 
 export default class Business extends Dispatcher {
     subscribeHeartbeat({ interval = 1000 }, callback: ResponseCallback) {
@@ -95,7 +96,16 @@ export default class Business extends Dispatcher {
             return { response, packet };
         });
     }
-    //执行头信息的解析还未写入
+    
+    getLaserInfo(key: number){
+        const info = new Laserinfo(key)
+        console.log('info', info, info.toBuffer());
+        return this.send(0x12, 0x01, info.toBuffer()).then(({response, packet}) =>{
+            console.log('receive', response, packet)
+            const LaserInfo = new Laserinfo().fromBuffer(response.data)
+            return {response, packet, LaserInfo}
+        })
+    }
 
     SetLaserPower(key: number, power: number){
         const info = new SetLaserPower(key, power)
@@ -142,4 +152,6 @@ export default class Business extends Dispatcher {
             return { response, packet };
         });
     }
+
+    
 }
