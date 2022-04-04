@@ -5,6 +5,10 @@ import GcodeFileInfo from './models/GcodeFileInfo';
 import MachineInfo from './models/MachineInfo';
 import MachineSize from './models/MachineSize';
 import ModuleInfo from './models/ModuleInfo';
+import MovementInstruction, { MoveDirection } from './models/MovementInstruction'
+import LaserCalibration from './models/LaserCalibration'
+import SetLaserPower from './models/SetLaserPower';
+import { readString, readUint32, stringToBuffer, writeFloat, writeInt8, writeUint32, writeUint8 } from '../helper';
 
 export default class Business extends Dispatcher {
     subscribeHeartbeat({ interval = 1000 }, callback: ResponseCallback) {
@@ -45,8 +49,15 @@ export default class Business extends Dispatcher {
         });
     }
 
-    requestHome() {
-        return this.send(0x01, 0x35, Buffer.alloc(1, 0)).then(({ response, packet }) => {
+    movementInstruction(direction: MoveDirection, distance: number) {
+        const info = new MovementInstruction(direction, distance)
+        return this.send(0x01, 0x34, info.toBuffer()).then(({ response, packet }) => {
+            return { response, packet };
+        });
+    }
+
+    requestHome(number: number) {
+        return this.send(0x01, 0x35, Buffer.alloc(1, number)).then(({ response, packet }) => {
             return { response, packet };
         });
     }
@@ -61,6 +72,73 @@ export default class Business extends Dispatcher {
 
     stopPrint() {
         return this.send(0xac, 0x06, Buffer.alloc(0)).then(({ response, packet }) => {
+            return { response, packet };
+        });
+    }
+
+    getGocdeFile(){
+        return this.send(0xac, 0x00, Buffer.alloc(0)).then(({ response, packet }) => {
+            const gcodeFileInfo = new GcodeFileInfo().fromBuffer(response.data);
+            return { response, packet, gcodeFileInfo };
+        });
+    }
+
+    laserCalibration(calibrationMode: number){
+        const info = new LaserCalibration(calibrationMode);
+        return this.send(0xa8, 0x02, info.toBuffer()).then(({ response, packet }) => {
+            return { response, packet };
+        });
+    }
+
+    laserCalibrationSave(number: number){
+        return this.send(0xa8, 0x03, Buffer.alloc(1, number)).then(({ response, packet }) => {
+            return { response, packet };
+        });
+    }
+    //执行头信息的解析还未写入
+
+    SetLaserPower(key: number, power: number){
+        const info = new SetLaserPower(key, power)
+        return this.send(0x12, 0x02, info.toBuffer()).then(({ response, packet }) => {
+            return { response, packet };
+        });
+    }
+
+    SetBrightness(key: number, brightness: number){
+        const tobuffer = Buffer.alloc(1 + 1, 0);
+        writeUint8(tobuffer, 0, key);
+        writeUint8(tobuffer, 1, brightness);
+        return this.send(0x12, 0x03, tobuffer).then(({ response, packet }) => {
+            return { response, packet };
+        });
+    }
+
+    SetFocalLength(key: number, focalLength: number){
+        const tobuffer = Buffer.alloc(1 + 1, 0);
+        writeUint8(tobuffer, 0, key);
+        writeUint8(tobuffer, 1, focalLength);
+        return this.send(0x12, 0x04, tobuffer).then(({ response, packet }) => {
+            return { response, packet };
+        });
+    }
+
+    TemperatureProtect(key: number, protectTemperature: number, recoverTemperature: number){
+        const tobuffer = Buffer.alloc(1 + 1 + 1, 0);
+        writeUint8(tobuffer, 0, key);
+        writeUint8(tobuffer, 1, protectTemperature);
+        writeInt8(tobuffer, 2, recoverTemperature);
+        return this.send(0x12, 0x05, tobuffer).then(({ response, packet }) => {
+            return { response, packet };
+        });
+    }
+
+    //主控主控设置到ESP32的蓝牙mac给屏幕未实现
+
+    SetLaserLock(key: number, lockStatus: number){
+        const tobuffer = Buffer.alloc(1 + 1 , 0);
+        writeUint8(tobuffer, 0, key);
+        writeUint8(tobuffer, 1, lockStatus);
+        return this.send(0x12, 0x07, tobuffer).then(({ response, packet }) => {
             return { response, packet };
         });
     }
