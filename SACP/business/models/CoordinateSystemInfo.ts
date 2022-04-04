@@ -32,10 +32,7 @@ export default class CoordinateSystemInfo implements Serializable {
         this.isOriginOffsetCoordinateSystem = readBool(buffer, 2);
         const coordinatesBuffer = buffer.slice(3);
         this.coordinates = CoordinateInfo.parseArray(coordinatesBuffer);
-<<<<<<< HEAD
 
-=======
->>>>>>> 5b6928b (Improvement: Add business methods)
         const originOffsetBuffer = buffer.slice(this.coordinates.length * CoordinateInfo.byteLength + 1 + 3);
         this.originOffset = CoordinateInfo.parseArray(originOffsetBuffer);
         return this;
