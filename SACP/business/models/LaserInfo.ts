@@ -15,7 +15,8 @@ export default class Laserinfo implements Serializable {
         this.laserFocalLength = laserFocalLength ?? 0;
         this.laserCurrentPower = laserCurrentPower ?? 0;
         this.laserTargetPower = laserTargetPower ?? 0;
-        this.fanlist = fanlist?? {};
+
+        this.fanlist = fanlist?? [];
     }
 
     toBuffer(): Buffer {
@@ -30,28 +31,19 @@ export default class Laserinfo implements Serializable {
         this.laserFocalLength = readFloat(buffer, 5);
         this.laserCurrentPower = readFloat(buffer, 9);
         this.laserTargetPower = readFloat(buffer, 13);
-        const fanlength = readUint8(buffer, 14);
+        const fanCount = readUint8(buffer, 14);
+        const fanBuffer = buffer.slice(15)
+        const byteLength = 3
         const fanInfo :any = {}
-        for (let i = 0; i < fanlength; i++) {
-            if(i === 0){
-                const fanIndex = readUint8(buffer, i+15)
-                const fanType = readUint8(buffer,i+16)
-                const fanSpeed = readUint8(buffer,i+17)
-                fanInfo[0] = fanIndex
-                fanInfo[1] = fanType
-                fanInfo[2] = fanSpeed
-                this.fanlist[i]=fanInfo
-            }else{
-                const fanIndex = readUint8(buffer, i+15+2)
-                const fanType = readUint8(buffer,i+16+2)
-                const fanSpeed = readUint8(buffer,i+17)
-                fanInfo[0] = fanIndex
-                fanInfo[1] = fanType
-                fanInfo[2] = fanSpeed
-                this.fanlist.push(fanInfo)
-
-            }
-
+        for (let i = 0; i < fanCount; i++) {
+            const fan = fanBuffer.slice(byteLength*i,byteLength*(i+1))
+            const fanIndex = readUint8(fan, 0)
+            const fanType = readUint8(fan ,1)
+            const fanSpeed = readUint8(fan ,2)
+            fanInfo[0] = fanIndex
+            fanInfo[1] = fanType
+            fanInfo[2] = fanSpeed
+            this.fanlist.push(fanInfo)
         }
         return this
     }
