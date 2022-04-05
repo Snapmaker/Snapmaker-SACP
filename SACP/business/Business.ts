@@ -99,9 +99,7 @@ export default class Business extends Dispatcher {
     
     getLaserInfo(key: number){
         const info = new Laserinfo(key)
-        console.log('info', info, info.toBuffer());
         return this.send(0x12, 0x01, info.toBuffer()).then(({response, packet}) =>{
-            console.log('receive', response, packet)
             const LaserInfo = new Laserinfo().fromBuffer(response.data)
             return {response, packet, LaserInfo}
         })
