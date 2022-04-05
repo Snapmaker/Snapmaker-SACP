@@ -66,8 +66,7 @@ export default class Business extends Dispatcher {
     startPrint(md5: string, gcodeName: string) {
         const info = new GcodeFileInfo(md5, gcodeName);
         return this.send(0xac, 0x03, info.toBuffer()).then(({ response, packet }) => {
-            const batchBufferInfo = new BatchBufferInfo().fromBuffer(response.data);
-            return { response, packet, batchBufferInfo };
+            return { response, packet };
         });
     }
 
@@ -96,7 +95,7 @@ export default class Business extends Dispatcher {
             return { response, packet };
         });
     }
-    
+
     getLaserInfo(key: number){
         const info = new Laserinfo(key)
         return this.send(0x12, 0x01, info.toBuffer()).then(({response, packet}) =>{
@@ -151,6 +150,6 @@ export default class Business extends Dispatcher {
         });
     }
 
-    
-    
+
+
 }
