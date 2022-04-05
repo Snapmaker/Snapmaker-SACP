@@ -91,8 +91,8 @@ export default class Business extends Dispatcher {
         });
     }
 
-    laserCalibrationSave(number: number){
-        return this.send(0xa8, 0x03, Buffer.alloc(1, number)).then(({ response, packet }) => {
+    laserCalibrationSave(type: number){
+        return this.send(0xa8, 0x03, Buffer.alloc(1, type)).then(({ response, packet }) => {
             return { response, packet };
         });
     }
@@ -151,5 +151,6 @@ export default class Business extends Dispatcher {
         });
     }
 
+    
     
 }

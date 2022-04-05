@@ -49,6 +49,7 @@ export default class Laserinfo implements Serializable {
                 fanInfo[1] = fanType
                 fanInfo[2] = fanSpeed
                 this.fanlist.push(fanInfo)
+
             }
 
         }
