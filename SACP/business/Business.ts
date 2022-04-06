@@ -63,8 +63,8 @@ export default class Business extends Dispatcher {
         });
     }
 
-    startPrint(md5: string, gcodeName: string) {
-        const info = new GcodeFileInfo(md5, gcodeName);
+    startPrint(md5: string, gcodeName: string, headType: number) {
+        const info = new GcodeFileInfo(md5, gcodeName, headType);
         return this.send(0xac, 0x03, info.toBuffer()).then(({ response, packet }) => {
             return { response, packet };
         });
