@@ -26,13 +26,12 @@ export default class CoordinateSystemInfo implements Serializable {
     }
 
     fromBuffer(buffer: Buffer) {
+        // require('fs').writeFileSync('./a.txt', buffer)
         this.homed = readUint8(buffer, 0);
         this.coordinateSystemId = readUint8(buffer, 1);
         this.isOriginOffsetCoordinateSystem = readBool(buffer, 2);
-
         const coordinatesBuffer = buffer.slice(3);
         this.coordinates = CoordinateInfo.parseArray(coordinatesBuffer);
-
         const originOffsetBuffer = buffer.slice(this.coordinates.length * CoordinateInfo.byteLength + 1 + 3);
         this.originOffset = CoordinateInfo.parseArray(originOffsetBuffer);
         return this;
