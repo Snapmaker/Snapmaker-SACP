@@ -76,6 +76,18 @@ export default class Business extends Dispatcher {
         });
     }
 
+    pausePrint() {
+        return this.send(0xac, 0x04, Buffer.alloc(0)).then(({ response, packet }) => {
+            return { response, packet }
+        });
+    }
+
+    resumePrint() {
+        return this.send(0xac, 0x05, Buffer.alloc(0)).then(({ response, packet }) => {
+            return { response, packet }
+        });
+    }
+
     getGocdeFile(){
         return this.send(0xac, 0x00, Buffer.alloc(0)).then(({ response, packet }) => {
             const gcodeFileInfo = new GcodeFileInfo().fromBuffer(response.data);
