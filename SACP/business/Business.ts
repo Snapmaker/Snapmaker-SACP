@@ -8,8 +8,14 @@ import ModuleInfo from './models/ModuleInfo';
 import MovementInstruction, { MoveDirection } from './models/MovementInstruction'
 import LaserCalibration from './models/LaserCalibration'
 import SetLaserPower from './models/SetLaserPower';
-import { readString, readUint32, stringToBuffer, writeFloat, writeInt8, writeUint32, writeUint8 } from '../helper';
+
+import { readString, readUint32, stringToBuffer, writeFloat, writeInt16, writeInt8, writeUint32, writeUint8 } from '../helper';
 import Laserinfo from './models/LaserInfo'
+import FDMInfo from './models/FDMInfo'
+import GetHotBed from './models/GetHotBed'
+import ExtruderOffset from './models/ExtruderOffset'
+import ExtruderMovement from './models/ExtruderMovement'
+import { Console, dir } from 'console';
 
 export default class Business extends Dispatcher {
     subscribeHeartbeat({ interval = 1000 }, callback: ResponseCallback) {
@@ -66,7 +72,7 @@ export default class Business extends Dispatcher {
     startPrint(md5: string, gcodeName: string, headType: number) {
         const info = new GcodeFileInfo(md5, gcodeName, headType);
         return this.send(0xac, 0x03, info.toBuffer()).then(({ response, packet }) => {
-            return { response, packet };
+            return { response, packet }
         });
     }
 
@@ -162,6 +168,81 @@ export default class Business extends Dispatcher {
         });
     }
 
+    //调试中。。。
+    GetFDMInfo(key: number){
+        const info = new FDMInfo(key)
+        return this.send(0x10, 0x01, info.toBuffer()).then(({response, packet}) =>{
+            // console.log('FDM',info.toBuffer,response,packet)
+            const getFDMInfo = new FDMInfo().fromBuffer(response.data)
+            return {response, packet, getFDMInfo}
+        }) 
+    }
+    
+    GetHotBed(key: number){
+        const info = new GetHotBed(key)
+        return this.send(0x14, 0x01, info.toBuffer()).then(({ response, packet }) => {
+            const hotBedInfo = new GetHotBed().fromBuffer(response.data)
+            return {response, packet, hotBedInfo}
+        });
+    }
 
+    SetExtruderTemperature(key: number, extruderIndex: number, temperature: number){
+        const tobuffer = Buffer.alloc(1 + 1 + 2, 0);
+        writeUint8(tobuffer, 0, key);
+        writeUint8(tobuffer, 1, extruderIndex);
+        writeInt16(tobuffer, 2, temperature);
+        return this.send(0x10, 0x02, tobuffer).then(({ response, packet }) => {
+            return { response, packet };
+        });
+    }
+ 
+    SetFilamentstatus(key: number, extruderIndex: number, filamentstatus: number){
+        const tobuffer = Buffer.alloc(1 + 1 + 1, 0);
+        writeUint8(tobuffer, 0, key);
+        writeUint8(tobuffer, 1, extruderIndex);
+        writeUint8(tobuffer, 2, filamentstatus);
+        return this.send(0x10, 0x04, tobuffer).then(({ response, packet }) => {
+            return { response, packet };
+        });
+    }
 
+    SwitchExtruder(key: number, extruderIndex: number){
+        const tobuffer = Buffer.alloc(1 + 1, 0);
+        writeUint8(tobuffer, 0, key);
+        writeUint8(tobuffer, 1, extruderIndex);
+        return this.send(0x10, 0x05, tobuffer).then(({ response, packet }) => {
+            return { response, packet };
+        });
+    }
+
+    SetExtruderSpeed(key: number, fansIndex: number, speedLevel: number){
+        const tobuffer = Buffer.alloc(1 + 1 + 1);
+        writeUint8(tobuffer, 0, key);
+        writeUint8(tobuffer, 1, fansIndex);
+        writeUint8(tobuffer, 2, speedLevel);
+        return this.send(0x10, 0x06, tobuffer).then(({ response, packet }) => {
+            return { response, packet };
+        });
+    }
+
+    SetExtruderOffset(key: number, index: number, direction: number, distance: number){
+        const info = new ExtruderOffset(key, index, direction, distance);
+        return this.send(0x10, 0x07, info.toBuffer()).then(({response, packet}) =>{
+            return {response, packet}
+        }) 
+    }
+
+    GetExtruderOffset(key: number){
+        return this.send(0x10, 0x08, Buffer.alloc(1, key)).then(({response, packet}) =>{
+            const ExtruderOffsetInfo = new ExtruderOffset().fromBuffer(response.data)
+            return {response, packet, ExtruderOffsetInfo}
+        }) 
+    }
+
+    ExtruderMovement(key: number, movementType: number, lengthIn: number, speedIn: number, lengthOut: number, speedOut: number){
+        const info = new ExtruderMovement(key, movementType, lengthIn, speedIn, lengthOut, speedOut)
+        return this.send(0x10, 0x09, info.toBuffer()).then(({response, packet}) =>{
+            return {response, packet}
+        }) 
+    }    
 }
