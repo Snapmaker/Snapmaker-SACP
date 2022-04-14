@@ -243,27 +243,28 @@ export default class Business extends Dispatcher {
     // ----------
 
     subscribeHeartbeat({ interval = 1000 }, callback: ResponseCallback) {
-        return this.subscribe(0x01, 0xa0, interval, callback);
+        return this.subscribe(0x01, 0xa0, interval, callback).then(({ response, packet }) => {
+            return { code: response.result, data: {} };
+        });
     }
 
     unsubscribeHeartbeat(callback: ResponseCallback) {
-        return this.unsubscribe(0x01, 0xa0, callback);
+        return this.unsubscribe(0x01, 0xa0, callback).then(({ response, packet }) => {
+            return { code: response.result, data: {} };
+        });
     }
 
     getModuleInfo() {
-        // return this.send(0x01, 0x20, Buffer.alloc(0)).then(({ response, packet }) => {
-        //     const moduleInfo = ModuleInfo.parseArray(response.data);
-        //     return { response, packet, data: { moduleInfo }, moduleInfo };
         return this.send(0x01, 0x20, PeerId.CONTROLLER, Buffer.alloc(0)).then(({ response, packet }) => {
             const moduleInfos = ModuleInfo.parseArray(response.data) as ModuleInfo[];
-            return { response, packet, data: { moduleInfo: moduleInfos }, moduleInfos };
+            return { code: response.result, data: moduleInfos as ModuleInfo[] };
         });
     }
 
     getMachineInfo() {
         return this.send(0x01, 0x21, PeerId.CONTROLLER, Buffer.alloc(0)).then(({ response, packet }) => {
             const machineInfo = new MachineInfo().fromBuffer(response.data);
-            return { response, packet, data: { machineInfo }, machineInfo };
+            return { code: response.result, data: machineInfo as MachineInfo };
         });
     }
 
