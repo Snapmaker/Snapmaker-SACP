@@ -3,7 +3,7 @@ import Communication from './Communication';
 import TCPConnection from '../connection/TCPConnection';
 import SerialPortConnection from '../connection/SerialPortConnection';
 import Packet from './Packet';
-import Header, { Attribute } from './Header';
+import Header, { Attribute, PeerId } from './Header';
 import Response from './Response';
 import { writeUint16 } from '../helper';
 
@@ -69,7 +69,7 @@ export default class Dispatcher extends EventEmitter {
         } else if (packet.header.attribute === Attribute.REQUEST) {
             // a request packet
             const callback = this.handlerMap.get(businessId);
-            callback && callback({ param: packet.payload, packet });
+            callback && callback({ param: packet.payload, packet } as RequestData);
         }
     }
 
@@ -78,18 +78,20 @@ export default class Dispatcher extends EventEmitter {
         this.handlerMap.set(businessId, callback);
     }
 
-    send(commandSet: number, commandId: number, payload: Buffer) {
+    send(commandSet: number, commandId: number, peerId: PeerId = PeerId.CONTROLLER, payload: Buffer) {
         if (this.communication) {
             const header = new Header();
             header.length = payload.byteLength + 8;
             header.commandSet = commandSet;
             header.commandId = commandId;
             header.attribute = Attribute.REQUEST;
+            header.receiverId = peerId;
             header.sequence = this.communication.getSequence();
 
             const packet = new Packet(header, payload);
+            // console.log('send before send:', packet.toBuffer());
             return this.communication.send(packet.toBuffer()).then(resPacket => {
-                const response = new Response().fromBuffer(resPacket.payload);
+                const response = new Response().fromBuffer(resPacket!.payload);
                 return { response, packet: resPacket } as ResponseData;
             });
         }
@@ -104,12 +106,15 @@ export default class Dispatcher extends EventEmitter {
             header.commandId = commandId;
             header.attribute = Attribute.ACK;
             header.sequence = requestPacket.header.sequence;
+            header.receiverId = requestPacket.header.senderId;
 
             const packet = new Packet(header, payload);
-            return this.communication.send(packet.toBuffer()).then(resPacket => {
-                const response = new Response().fromBuffer(resPacket.payload);
-                return { response, packet: resPacket } as ResponseData;
-            });
+            // console.log('ack before send:', packet.toBuffer());
+            return this.communication.send(packet.toBuffer(), false);
+            // .then(resPacket => {
+            //     const response = new Response().fromBuffer(resPacket.payload);
+            //     return { response, packet: resPacket } as ResponseData;
+            // });
         }
         return Promise.reject(new Error('communication not initialize'));
     }
@@ -140,7 +145,7 @@ export default class Dispatcher extends EventEmitter {
             writeUint16(intervalBuffer, 0, interval);
 
             const payload = Buffer.concat([Buffer.from([commandSet, commandId]), intervalBuffer]);
-            return this.send(0x01, 0x00, payload).then((res) => {
+            return this.send(0x01, 0x00, PeerId.CONTROLLER, payload).then((res) => {
                 if (res.response?.result === 0) {
                     this.on(businessId, callback);
                 }
@@ -151,7 +156,7 @@ export default class Dispatcher extends EventEmitter {
 
     unsubscribe(commandSet: number, commandId: number, callback: ResponseCallback) {
         const payload = Buffer.from([commandSet, commandId]);
-        return this.send(0x01, 0x01, payload).then((res) => {
+        return this.send(0x01, 0x01, PeerId.CONTROLLER, payload).then((res) => {
             if (res.response?.result === 0) {
                 const businessId = `${res.packet.header.commandSet * 256 + res.packet.header.commandId}`;
                 if (this.listenerCount(businessId) > 1) {

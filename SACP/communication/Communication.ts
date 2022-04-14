@@ -58,18 +58,25 @@ export default class Communication extends EventEmitter {
         return globalSequence;
     }
 
-    send(buffer: Buffer) {
-        return new Promise<Packet>((resolve, reject) => {
-            this.requestHandlerMap.set(globalSequence, {
-                startTime: Date.now(),
-                success: resolve,
-                fail: reject
-            });
-            // empty payload buffer should be length of 15
-            if (this.connection && buffer.length >= 15) {
-                this.connection.write(buffer);
+    send(buffer: Buffer, needReply: boolean = true) {
+        if (buffer.length >= 15) {
+            if (needReply) {
+                return new Promise<Packet>((resolve, reject) => {
+                    // empty payload buffer should be length of 15
+                    this.requestHandlerMap.set(globalSequence, {
+                        startTime: Date.now(),
+                        success: resolve,
+                        fail: reject
+                    });
+                    this.connection && this.connection.write(buffer);
+                });
+            } else {
+                this.connection && this.connection.write(buffer);
+                return Promise.resolve();
             }
-        });
+        } else {
+            return Promise.reject(new Error('invalid SACP packet'));
+        }
     }
 
     receive(buffer: Buffer) {
@@ -126,6 +133,7 @@ export default class Communication extends EventEmitter {
                 const sequence = this.receiveBuffer.readUInt16LE(9);
                 const handler = this.requestHandlerMap.get(sequence);
                 if (handler) {
+                    // console.log('reolvePacketBuffer', this.receiveBuffer);
                     // ACK packet related to request
                     handler.success(new Packet().fromBuffer(this.receiveBuffer));
                     this.requestHandlerMap.delete(sequence);
@@ -134,16 +142,17 @@ export default class Communication extends EventEmitter {
                     this.emit('request', new Packet().fromBuffer(this.receiveBuffer));
                 }
             } else if (attribute === Attribute.REQUEST) {
-                const sequence = this.receiveBuffer.readUInt16LE(9);
-                const handler = this.requestHandlerMap.get(sequence);
-                if (handler) {
-                    // ack a sent request, this is wrong, need fix from Master Controller
-                    handler.success(new Packet().fromBuffer(this.receiveBuffer));
-                    this.requestHandlerMap.delete(sequence);
-                } else {
-                    // request packet
-                    this.emit('request', new Packet().fromBuffer(this.receiveBuffer));
-                }
+                // const sequence = this.receiveBuffer.readUInt16LE(9);
+                // const handler = this.requestHandlerMap.get(sequence);
+                // if (handler) {
+                //     // ack a sent request, this is wrong, need fix from Master Controller
+                //     handler.success(new Packet().fromBuffer(this.receiveBuffer));
+                //     this.requestHandlerMap.delete(sequence);
+                // } else {
+                // request packet
+                // console.log('reolvePacketBuffer', this.receiveBuffer);
+                this.emit('request', new Packet().fromBuffer(this.receiveBuffer));
+                // }
             }
         }
         this.receiveBuffer = Buffer.alloc(0);
