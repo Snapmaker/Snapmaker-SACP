@@ -1,7 +1,7 @@
-import { readFloat, readUint8 } from '../../helper';
+import { readFloat, readUint8, writeFloat, writeUint8 } from '../../helper';
 import { Serializable } from '../../Serializable';
 
-enum Direction {
+export enum Direction {
     X1, Y1, Z1, A1, B1, C1, X2
 }
 
@@ -18,7 +18,10 @@ export default class CoordinateInfo implements Serializable {
     }
 
     toBuffer(): Buffer {
-        throw new Error('Method not implemented.');
+        const buffer = Buffer.alloc(5);
+        writeUint8(buffer, 0, this.key);
+        writeFloat(buffer, 1, this.value);
+        return buffer;
     }
 
     fromBuffer(buffer: Buffer) {
