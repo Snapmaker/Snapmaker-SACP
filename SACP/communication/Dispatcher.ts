@@ -6,10 +6,12 @@ import Packet from './Packet';
 import Header, { Attribute, PeerId } from './Header';
 import Response from './Response';
 import { writeUint16 } from '../helper';
+import {Serializable} from "../Serializable";
 
 export type ResponseData = {
     response: Response;
     packet: Packet;
+    data?: any;
 }
 
 export type RequestData = {
@@ -47,6 +49,8 @@ export default class Dispatcher extends EventEmitter {
         this.communication.on('request', (packet) => {
             this.packetHandler(packet);
         });
+
+
     }
 
     dispose() {
@@ -63,7 +67,7 @@ export default class Dispatcher extends EventEmitter {
         const commandId = packet.header.commandId;
         const businessId = commandSet * 256 + commandId;
         // this is a notification
-        if (commandSet === 0x01 && commandId >= 0xa0) {
+        if (this.listenerCount(`${businessId}`) > 0) {
             const response = new Response().fromBuffer(packet.payload);
             this.emit(`${businessId}`, { response, packet } as ResponseData);
         } else if (packet.header.attribute === Attribute.REQUEST) {
@@ -132,10 +136,10 @@ export default class Dispatcher extends EventEmitter {
     }
 
     subscribe(commandSet: number, commandId: number, interval: number, callback: ResponseCallback) {
-        const businessId = `${commandSet * 256 + commandId}`;
+        const businessId = commandSet * 256 + commandId;
 
-        if (this.listenerCount(businessId) > 0) {
-            this.on(businessId, callback);
+        if (this.listenerCount(`${businessId}`) > 0) {
+            this.on(`${businessId}`, callback);
             return Promise.resolve({
                 response: new Response(),
                 packet: new Packet()
@@ -147,7 +151,7 @@ export default class Dispatcher extends EventEmitter {
             const payload = Buffer.concat([Buffer.from([commandSet, commandId]), intervalBuffer]);
             return this.send(0x01, 0x00, PeerId.CONTROLLER, payload).then((res) => {
                 if (res.response?.result === 0) {
-                    this.on(businessId, callback);
+                    this.on(`${businessId}`, callback);
                 }
                 return res;
             });
