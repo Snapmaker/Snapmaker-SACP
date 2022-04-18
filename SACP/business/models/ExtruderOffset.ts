@@ -1,5 +1,4 @@
-import { dir } from 'console';
-import { readFloat, readString, readUint32, readUint8, stringToBuffer, writeFloat, writeUint32, writeUint8 } from '../../helper';
+import { readFloat, readUint8, writeFloat, writeUint8 } from '../../helper';
 import { Serializable } from '../../Serializable';
 
 export default class ExtruderOffset implements Serializable {
@@ -16,8 +15,8 @@ export default class ExtruderOffset implements Serializable {
     constructor(key?: number, index?: number, direction?: number, distance?: number) {
         this.key = key ?? 0;
         this.index = index ?? 0;
-        this.direction = direction ?? 0
-        this.distance = distance ?? 0
+        this.direction = direction ?? 0;
+        this.distance = distance ?? 0;
     }
 
     toBuffer(): Buffer {

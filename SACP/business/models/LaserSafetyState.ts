@@ -29,8 +29,8 @@ export default class LaserSafetyState implements Serializable {
         this.key = readUint8(buffer, 0);
         this.state = readUint8(buffer, 1);
         this.laserTubeTemperature = readFloat(buffer, 2);
-        this.roll = readFloat(buffer, 6)
-        this.pitch = readFloat(buffer, 10)
+        this.roll = readFloat(buffer, 6);
+        this.pitch = readFloat(buffer, 10);
         return this;
     }
 }
