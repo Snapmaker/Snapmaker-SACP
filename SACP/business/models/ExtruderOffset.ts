@@ -31,6 +31,7 @@ export default class ExtruderOffset implements Serializable {
     }
 
     fromBuffer(buffer: Buffer) {
+        // TODO
         const length = readUint8(buffer, 0);
         this.offsets = [];
         for (let i = 0; i < length; i++) {
