@@ -1,8 +1,9 @@
-import { readString, readUint32, stringToBuffer, writeFloat, writeUint32, writeUint8 } from '../../helper';
+import { writeFloat, writeUint8 } from '../../helper';
 import { Serializable } from '../../Serializable';
 
 export default class SetLaserPower implements Serializable {
     key: number;
+
     power: number;
 
     constructor(key?: number, power?: number) {

@@ -1,11 +1,15 @@
-import { readBool, readFloat, readString, readUint16, readUint32, readUint8, stringToBuffer, writeUint32, writeUint8 } from '../../helper';
+import { readBool, readFloat, readUint16, readUint8, writeUint8 } from '../../helper';
 import { Serializable } from '../../Serializable';
 
 export default class FDMInfo implements Serializable {
     key: number;
+
     headStatus: number;
+
     headActive: boolean;
+
     extruderList: any;
+
     fansList : any;
 
     constructor(key?: number, headStatus?: number, headActive?: boolean, extruderList?: any, fansList?: any) {

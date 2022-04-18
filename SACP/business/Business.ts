@@ -10,7 +10,6 @@ import ModuleInfo from './models/ModuleInfo';
 import MovementInstruction, { MoveDirection } from './models/MovementInstruction';
 import LaserCalibration from './models/LaserCalibration';
 import SetLaserPower from './models/SetLaserPower';
-
 import { readFloat, readString, readUint16, readUint32, readUint8, stringToBuffer, writeFloat, writeInt16, writeInt8, writeUint16, writeUint32, writeUint8 } from '../helper';
 import FDMInfo from './models/FDMInfo';
 import GetHotBed from './models/GetHotBed';
