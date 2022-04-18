@@ -6,7 +6,6 @@ export default class Laserinfo implements Serializable {
 
     zoneList: any;
 
-
     constructor(key?: number, zoneList?: any) {
         this.key = key ?? 0;
         this.zoneList = zoneList ?? [];
