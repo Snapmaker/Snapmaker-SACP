@@ -3,6 +3,7 @@ import { Serializable } from '../../Serializable';
 
 export default class LaserTubeState implements Serializable {
     currentPower: number;
+
     targetPower : number;
 
     constructor(currentPower?: number, targetPower?: number) {

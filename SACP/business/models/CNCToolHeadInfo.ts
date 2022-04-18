@@ -3,13 +3,21 @@ import { Serializable } from '../../Serializable';
 
 export default class CNCToolHeadInfo implements Serializable {
     key: number;
+
     headStatus: number;
+
     headActive : boolean;
+
     runningState : number;
+
     controlMode : number;
+
     currentPower : number;
+
     targetPower : number;
+
     currentSpeed : number;
+
     targetSpeed : number;
 
     constructor(key?: number, headStatus?: number, headActive?: boolean, runningState?: number, controlMode?: number, currentPower?: number, targetPower?: number, currentSpeed?: number, targetSpeed?: number) {

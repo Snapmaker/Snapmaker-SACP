@@ -3,12 +3,18 @@ import { Serializable } from '../../Serializable';
 
 export default class CncSpeedState implements Serializable {
     key: number;
+
     runningState: number;
-    currentPower : number;
-    targetPower : number;
-    currentSpeed : number;
-    targetSpeed : number;
-    controlMode : number;
+
+    currentPower: number;
+
+    targetPower: number;
+
+    currentSpeed: number;
+
+    targetSpeed: number;
+
+    controlMode: number;
 
     constructor(key?: number, runningState?: number, currentPower?: number, targetPower?: number, currentSpeed?: number, targetSpeed?: number, controlMode?: number) {
         this.key = key ?? 0;

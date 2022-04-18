@@ -3,10 +3,15 @@ import { Serializable } from '../../Serializable';
 
 export default class ExtruderMovement implements Serializable {
     key: number;
+
     movementType: number;
+
     lengthIn: number;
+
     speedIn: number;
+
     lengthOut: number;
+    
     speedOut: number;
 
 

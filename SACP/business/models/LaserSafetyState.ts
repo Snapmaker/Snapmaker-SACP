@@ -3,9 +3,13 @@ import { Serializable } from '../../Serializable';
 
 export default class LaserSafetyState implements Serializable {
     key: number;
+
     state: number;
+
     laserTubeTemperature: number;
+
     roll: number;
+
     pitch: number;
 
 
