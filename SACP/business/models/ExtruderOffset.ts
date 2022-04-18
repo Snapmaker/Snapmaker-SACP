@@ -8,8 +8,10 @@ export default class ExtruderOffset implements Serializable {
     index: number;
 
     direction: number;
-    
-    distance: number
+
+    distance: number;
+
+    offsets: any[] = [];
 
     constructor(key?: number, index?: number, direction?: number, distance?: number) {
         this.key = key ?? 0;
@@ -19,17 +21,28 @@ export default class ExtruderOffset implements Serializable {
     }
 
     toBuffer(): Buffer {
-        const buffer = Buffer.alloc(1 + 1 + 1 + 4, 0);
-        writeUint8(buffer, 0, this.key);
-        writeUint8(buffer, 1, this.index);
-        writeUint8(buffer, 2, this.distance);
-        writeFloat(buffer, 3, this.distance);
+        const buffer = Buffer.alloc(1 + 1 + 1 + 1 + 4, 0);
+        writeUint8(buffer, 0, 1); // array length
+        writeUint8(buffer, 1, this.key);
+        writeUint8(buffer, 2, this.index);
+        writeUint8(buffer, 3, this.direction);
+        writeFloat(buffer, 4, this.distance);
         return buffer;
     }
 
     fromBuffer(buffer: Buffer) {
-        this.index = readUint8(buffer, 1);
-        this.distance = readUint8(buffer, 2);
-        this.distance = readFloat(buffer, 3);
+        const length = readUint8(buffer, 0);
+        this.offsets = [];
+        for (let i = 0; i < length; i++) {
+            const index = readUint8(buffer, 1 + i * 6);
+            const direction = readUint8(buffer, 2 + i * 6);
+            const distance = readFloat(buffer, 3 + i * 6);
+            this.offsets.push({
+                index,
+                direction,
+                distance
+            });
+        }
+        return this.offsets;
     }
 }

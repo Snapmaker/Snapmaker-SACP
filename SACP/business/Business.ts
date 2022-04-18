@@ -11,7 +11,8 @@ import MovementInstruction, { MoveDirection } from './models/MovementInstruction
 import LaserCalibration from './models/LaserCalibration';
 import SetLaserPower from './models/SetLaserPower';
 import { readFloat, readString, readUint16, readUint32, readUint8, stringToBuffer, writeFloat, writeInt16, writeInt8, writeUint16, writeUint32, writeUint8 } from '../helper';
-import FDMInfo from './models/FDMInfo';
+import Laserinfo from './models/LaserInfo';
+import FdmToolHeadInfo from './models/FdmToolHeadInfo';
 import GetHotBed from './models/GetHotBed';
 import ExtruderOffset from './models/ExtruderOffset';
 import ExtruderMovement from './models/ExtruderMovement';
@@ -387,10 +388,10 @@ export default class Business extends Dispatcher {
 
     //调试中。。。
     GetFDMInfo(key: number) {
-        const info = new FDMInfo(key);
+        const info = new FdmToolHeadInfo(key);
         return this.send(0x10, 0x01, PeerId.CONTROLLER, info.toBuffer()).then(({ response, packet }) => {
             // console.log('FDM',info.toBuffer,response,packet)
-            const getFDMInfo = new FDMInfo().fromBuffer(response.data);
+            const getFDMInfo = new FdmToolHeadInfo().fromBuffer(response.data);
             return { response, packet, data: { getFDMInfo } };
         });
     }
