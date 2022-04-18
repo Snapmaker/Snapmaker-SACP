@@ -16,6 +16,7 @@ export default class CncSpeedState implements Serializable {
 
     controlMode: number;
 
+
     constructor(key?: number, runningState?: number, currentPower?: number, targetPower?: number, currentSpeed?: number, targetSpeed?: number, controlMode?: number) {
         this.key = key ?? 0;
         this.runningState = runningState ?? 0;
