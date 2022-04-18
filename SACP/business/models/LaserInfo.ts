@@ -1,50 +1,70 @@
-import { readFloat, readString, readUint32, readUint8, stringToBuffer, writeUint32, writeUint8 } from '../../helper';
+import { readFloat, readUint8 } from '../../helper';
 import { Serializable } from '../../Serializable';
 
-export default class Laserinfo implements Serializable {
-    key: number;
-    headStatus: number;
-    laserFocalLength: number;
-    laserCurrentPower: number;
-    laserTargetPower: number;
-    fanlist: any;
+class LaserTubeState implements Serializable {
+    currentPower: number = 0;
 
-    constructor(key?: number, headStatus?: number, laserFocalLength?: number, laserCurrentPower?: number, laserTargetPower?: number, fanlist?:any[]) {
-        this.key = key ?? 0;
-        this.headStatus = headStatus ?? 0;
-        this.laserFocalLength = laserFocalLength ?? 0;
-        this.laserCurrentPower = laserCurrentPower ?? 0;
-        this.laserTargetPower = laserTargetPower ?? 0;
-
-        this.fanlist = fanlist?? [];
-    }
+    targetPower: number = 0;
 
     toBuffer(): Buffer {
-        const buffer = Buffer.alloc(1,0);
-        writeUint8(buffer, 0, this.key);
-        return buffer
+        throw new Error('Method not implemented.');
+    }
+
+    fromBuffer(buffer: Buffer) {
+        this.currentPower = readFloat(buffer, 0);
+        this.targetPower = readFloat(buffer, 4);
+        return this;
+    }
+}
+
+class FanInfo implements Serializable {
+    index: number = 0;
+
+    type: number = 0;
+
+    toBuffer(): Buffer {
+        throw new Error('Method not implemented.');
+    }
+
+    fromBuffer(buffer: Buffer) {
+        this.index = readUint8(buffer, 0);
+        this.type = readUint8(buffer, 1);
+        return this;
+    }
+
+    static parseArray(buffer: Buffer) {
+        const result = [];
+        const len = readUint8(buffer, 0);
+        const elementBuffer = buffer.slice(1);
+        for (let i = 0; i < len; i++) {
+            const info = new FanInfo().fromBuffer(elementBuffer.slice(i * 2, i * 2 + 2));
+            result.push(info);
+        }
+        return result;
+    }
+}
+
+export default class LaserInfo implements Serializable {
+    key: number = 0;
+
+    headStatus: number = 0;
+
+    laserFocalLength: number = 0;
+
+    laserTubeState: LaserTubeState = new LaserTubeState();
+
+    fansList: Array<FanInfo> = [];
+
+    toBuffer(): Buffer {
+        throw new Error('Method not implemented.');
     }
 
     fromBuffer(buffer: Buffer) {
         this.key = readUint8(buffer, 0);
         this.headStatus = readUint8(buffer, 1);
-        this.laserFocalLength = readFloat(buffer, 5);
-        this.laserCurrentPower = readFloat(buffer, 9);
-        this.laserTargetPower = readFloat(buffer, 13);
-        const fanCount = readUint8(buffer, 14);
-        const fanBuffer = buffer.slice(15)
-        const byteLength = 3
-        const fanInfo :any = {}
-        for (let i = 0; i < fanCount; i++) {
-            const fan = fanBuffer.slice(byteLength*i,byteLength*(i+1))
-            const fanIndex = readUint8(fan, 0)
-            const fanType = readUint8(fan ,1)
-            const fanSpeed = readUint8(fan ,2)
-            fanInfo[0] = fanIndex
-            fanInfo[1] = fanType
-            fanInfo[2] = fanSpeed
-            this.fanlist.push(fanInfo)
-        }
-        return this
+        this.laserFocalLength = readFloat(buffer, 2);
+        this.laserTubeState = new LaserTubeState().fromBuffer(buffer.slice(6));
+        this.fansList = FanInfo.parseArray(buffer.slice(14));
+        return this;
     }
 }

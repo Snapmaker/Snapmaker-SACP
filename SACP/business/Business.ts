@@ -12,7 +12,6 @@ import LaserCalibration from './models/LaserCalibration';
 import SetLaserPower from './models/SetLaserPower';
 
 import { readFloat, readString, readUint16, readUint32, readUint8, stringToBuffer, writeFloat, writeInt16, writeInt8, writeUint16, writeUint32, writeUint8 } from '../helper';
-import Laserinfo from './models/LaserInfo';
 import FDMInfo from './models/FDMInfo';
 import GetHotBed from './models/GetHotBed';
 import ExtruderOffset from './models/ExtruderOffset';
@@ -341,16 +340,6 @@ export default class Business extends Dispatcher {
         });
     }
 
-    getLaserInfo(key: number) {
-        const info = new Laserinfo(key);
-        console.log('getLaserInfo', info);
-        return this.send(0x12, 0x01, PeerId.CONTROLLER, info.toBuffer()).then(({ response, packet }) => {
-            const LaserInfo = new Laserinfo().fromBuffer(response.data);
-            console.log('res', response);
-            return { response, packet, data: { LaserInfo } };
-        });
-    }
-
     SetLaserPower(key: number, power: number) {
         const info = new SetLaserPower(key, power);
         return this.send(0x12, 0x02, PeerId.CONTROLLER, info.toBuffer()).then(({ response, packet }) => {
@@ -490,6 +479,7 @@ export default class Business extends Dispatcher {
             let finalBuf = Buffer.alloc(0);
             inputStream.on('data', (buf) => {
                 // console.log('>-', buf);
+                //@ts-ignore
                 finalBuf = Buffer.concat([finalBuf, buf]);
             });
             inputStream.on('end', () => {
