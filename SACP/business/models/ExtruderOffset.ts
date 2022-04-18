@@ -4,8 +4,11 @@ import { Serializable } from '../../Serializable';
 
 export default class ExtruderOffset implements Serializable {
     key: number;
+
     index: number;
+
     direction: number;
+    
     distance: number
 
     constructor(key?: number, index?: number, direction?: number, distance?: number) {

@@ -1,11 +1,15 @@
-import { readBool, readFloat, readString, readUint16, readUint32, readUint8, stringToBuffer, writeUint32, writeUint8 } from '../../helper';
+import { readBool, readFloat, readUint16, readUint8, writeUint8 } from '../../helper';
 import { Serializable } from '../../Serializable';
 
 export default class FDMInfo implements Serializable {
     key: number;
+
     headStatus: number;
+
     headActive: boolean;
+
     extruderList: any;
+
     fansList : any;
 
     constructor(key?: number, headStatus?: number, headActive?: boolean, extruderList?: any, fansList?: any) {
@@ -27,7 +31,7 @@ export default class FDMInfo implements Serializable {
         this.headStatus = readUint8(buffer, 1);
         this.headActive = readBool(buffer, 2);
         const extruderCount = readUint8(buffer,3)
-        //数组内一个喷嘴的信息长度是17
+        //The information length of one nozzle in the array is 17
         const extrudeByteLength = 17
         const extruderBuffer = buffer.slice(4,extruderCount*extrudeByteLength+4)
         for (let i =0 ;i<extruderCount;i++) {
@@ -53,7 +57,7 @@ export default class FDMInfo implements Serializable {
         }
         const fanCount = readUint8(buffer,extruderCount*extrudeByteLength)
         const fanBuffer =  buffer.slice(extruderCount*extrudeByteLength+1+4)
-        //数组内一个风扇的信息长度是3
+        //The length of information for one fan in the array is 3
         const fanByteLength = 3
         for (let i = 0; i< fanCount; i++) {
             const fan = fanBuffer.slice(fanByteLength*i, fanByteLength*(i+1))

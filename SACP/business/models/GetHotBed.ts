@@ -1,10 +1,9 @@
-import { AnyTxtRecord } from 'dns';
-import { Z_ERRNO } from 'zlib';
-import { readFloat, readString, readUint32, readUint8, stringToBuffer, writeUint32, writeUint8, readInt16 } from '../../helper';
+import { readFloat, readUint8, writeUint8, readInt16 } from '../../helper';
 import { Serializable } from '../../Serializable';
 
 export default class Laserinfo implements Serializable {
     key: number;
+    
     zoneList: any;
 
 
