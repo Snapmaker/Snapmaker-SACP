@@ -1,5 +1,5 @@
-import { Serializable } from "../../Serializable";
-import {readBool, readFloat, readUint16, readUint8 } from '../../helper';
+import { Serializable } from '../../Serializable';
+import { readBool, readFloat, readUint16, readUint8 } from '../../helper';
 
 export default class ExtruderInfo implements Serializable {
     key: number = 0;
@@ -32,14 +32,14 @@ export default class ExtruderInfo implements Serializable {
             const diameter = readFloat(extruder, 5);
             const currentTemperature = readFloat(extruder, 9);
             const targetTemperature = readUint16(extruder, 13);
-            extruderInfo['index'] = index;
-            extruderInfo['filamentStatus'] = filamentStatus;
-            extruderInfo['materiaDetection'] = materiaDetection;
-            extruderInfo['status'] = status;
-            extruderInfo['type'] = type;
-            extruderInfo['diameter'] = diameter;
-            extruderInfo['currentTemperature'] = currentTemperature;
-            extruderInfo['targetTemperature'] = targetTemperature;
+            extruderInfo.index = index;
+            extruderInfo.filamentStatus = filamentStatus;
+            extruderInfo.materiaDetection = materiaDetection;
+            extruderInfo.status = status;
+            extruderInfo.type = type;
+            extruderInfo.diameter = diameter;
+            extruderInfo.currentTemperature = currentTemperature;
+            extruderInfo.targetTemperature = targetTemperature;
             this.extruderList.push(extruderInfo);
         }
         return this;

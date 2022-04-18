@@ -11,18 +11,18 @@ export default class SetHeatedBed implements Serializable {
     constructor(key: number, zoneIndex: number, temperature: number) {
         this.key = key;
         this.zoneIndex = zoneIndex;
-        this.temperature = temperature
+        this.temperature = temperature;
     }
 
     toBuffer(): Buffer {
-        const buffer = Buffer.alloc(4,0);
+        const buffer = Buffer.alloc(4, 0);
         writeUint8(buffer, 0, this.key);
         writeUint8(buffer, 1, this.zoneIndex);
         writeUint16(buffer, 2, this.temperature);
-        return buffer
+        return buffer;
     }
 
-    fromBuffer(buffer: Buffer) {
+    fromBuffer() {
         return this;
     }
 }

@@ -31,10 +31,7 @@ export default class ModuleInfo implements Serializable {
 
     moduleFirmwareVersion: string;
 
-    constructor(
-        key?: number, moduleId?: number, moduleIndex?: ModuleIndex, moduleState?: ModuleState,
-        serialNumber?: number, hardwareVersion?: number, moduleFirmwareVersion?: string
-    ) {
+    constructor(key?: number, moduleId?: number, moduleIndex?: ModuleIndex, moduleState?: ModuleState,serialNumber?: number, hardwareVersion?: number, moduleFirmwareVersion?: string) {
         this.key = key ?? 0;
         this.moduleId = moduleId ?? 0;
         this.moduleIndex = moduleIndex ?? FMDIndex.LEFT;
