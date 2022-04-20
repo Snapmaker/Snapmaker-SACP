@@ -53,6 +53,10 @@ export default class LaserToolHeadInfo implements Serializable {
 
     laserTubeState: LaserTubeState = new LaserTubeState();
 
+    platformHeight: number = 0;
+
+    axisCenterHeight:number = 0;
+
     fansList: Array<FanInfo> = [];
 
     toBuffer(): Buffer {
@@ -63,8 +67,10 @@ export default class LaserToolHeadInfo implements Serializable {
         this.key = readUint8(buffer, 0);
         this.headStatus = readUint8(buffer, 1);
         this.laserFocalLength = readFloat(buffer, 2);
-        this.laserTubeState = new LaserTubeState().fromBuffer(buffer.slice(6));
-        this.fansList = FanInfo.parseArray(buffer.slice(14));
+        this.platformHeight = readFloat(buffer, 6);
+        this.axisCenterHeight = readFloat(buffer, 10);
+        this.laserTubeState = new LaserTubeState().fromBuffer(buffer.slice(14));
+        this.fansList = FanInfo.parseArray(buffer.slice(22));
         return this;
     }
 }
