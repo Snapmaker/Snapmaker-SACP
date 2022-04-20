@@ -22,7 +22,7 @@ export function writeBool(buffer: Buffer, offset: number = 0, value: number) {
 }
 
 export function readUint8(buffer: Buffer, offset: number = 0) {
-    return buffer.readUint8(offset);
+    return buffer.readUInt8(offset);
 }
 
 export function writeUint8(buffer: Buffer, offset: number = 0, value: number) {
