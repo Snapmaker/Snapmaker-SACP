@@ -15,7 +15,7 @@ export default class GcodeFileInfo implements Serializable {
     }
 
     toBuffer(): Buffer {
-        return Buffer.concat([stringToBuffer(this.md5), stringToBuffer(this.gcodeName), Buffer.alloc(1,this.headType)]);
+        return Buffer.concat([stringToBuffer(this.md5), stringToBuffer(this.gcodeName), Buffer.alloc(1, this.headType)]);
     }
 
     fromBuffer(buffer: Buffer) {

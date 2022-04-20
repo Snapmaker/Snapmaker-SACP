@@ -1,5 +1,5 @@
 import { Serializable } from '../../Serializable';
-import {writeFloat, writeUint8, writeUint16, readUint8, readFloat, readUint16} from '../../helper';
+import { writeFloat, writeUint8, writeUint16, readUint8, readFloat, readUint16 } from '../../helper';
 
 export default class ZoneInfo implements Serializable {
     zoneIndex: number;

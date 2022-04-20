@@ -25,14 +25,14 @@ export default class ExtruderMovement implements Serializable {
     }
 
     toBuffer(): Buffer {
-        const buffer = Buffer.alloc(18,0);
+        const buffer = Buffer.alloc(18, 0);
         writeUint8(buffer, 0, this.key);
         writeUint8(buffer, 1, this.movementType);
         writeFloat(buffer, 2, this.lengthIn);
         writeFloat(buffer, 6, this.speedIn);
         writeFloat(buffer, 10, this.lengthOut);
         writeFloat(buffer, 14, this.speedOut);
-        return buffer
+        return buffer;
     }
 
     fromBuffer() {

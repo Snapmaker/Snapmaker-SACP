@@ -44,7 +44,7 @@ class FanInfo implements Serializable {
     }
 }
 
-export default class LaserInfo implements Serializable {
+export default class LaserToolHeadInfo implements Serializable {
     key: number = 0;
 
     headStatus: number = 0;

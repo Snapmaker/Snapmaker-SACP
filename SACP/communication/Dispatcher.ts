@@ -6,7 +6,6 @@ import Packet from './Packet';
 import Header, { Attribute, PeerId } from './Header';
 import Response from './Response';
 import { writeUint16 } from '../helper';
-import {Serializable} from "../Serializable";
 
 export type ResponseData = {
     response: Response;
@@ -49,8 +48,6 @@ export default class Dispatcher extends EventEmitter {
         this.communication.on('request', (packet) => {
             this.packetHandler(packet);
         });
-
-
     }
 
     dispose() {

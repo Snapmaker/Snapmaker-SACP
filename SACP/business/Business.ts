@@ -11,7 +11,6 @@ import MovementInstruction, { MoveDirection } from './models/MovementInstruction
 import LaserCalibration from './models/LaserCalibration';
 import SetLaserPower from './models/SetLaserPower';
 import { readFloat, readString, readUint16, readUint32, readUint8, stringToBuffer, writeFloat, writeInt16, writeInt8, writeUint16, writeUint32, writeUint8 } from '../helper';
-import Laserinfo from './models/LaserInfo';
 import FdmToolHeadInfo from './models/FdmToolHeadInfo';
 import GetHotBed from './models/GetHotBed';
 import ExtruderOffset from './models/ExtruderOffset';
@@ -19,6 +18,7 @@ import ExtruderMovement from './models/ExtruderMovement';
 import { PeerId } from '../communication/Header';
 import CalibrationInfo from './models/CalibrationInfo';
 // @ts-ignore
+// eslint-disable-next-line import/no-unresolved
 import DataStorage from '../../../../DataStorage';
 import CoordinateInfo from './models/CoordinateInfo';
 import LaserToolHeadInfo from './models/LaserToolHeadInfo';
@@ -243,27 +243,27 @@ export default class Business extends Dispatcher {
 
     subscribeHeartbeat({ interval = 1000 }, callback: ResponseCallback) {
         return this.subscribe(0x01, 0xa0, interval, callback).then(({ response, packet }) => {
-            return { code: response.result, data: {} };
+            return { code: response.result, packet, data: {} };
         });
     }
 
     unsubscribeHeartbeat(callback: ResponseCallback) {
         return this.unsubscribe(0x01, 0xa0, callback).then(({ response, packet }) => {
-            return { code: response.result, data: {} };
+            return { code: response.result, packet, data: {} };
         });
     }
 
     getModuleInfo() {
         return this.send(0x01, 0x20, PeerId.CONTROLLER, Buffer.alloc(0)).then(({ response, packet }) => {
             const moduleInfos = ModuleInfo.parseArray(response.data) as ModuleInfo[];
-            return { code: response.result, data: moduleInfos as ModuleInfo[] };
+            return { code: response.result, packet, data: moduleInfos as ModuleInfo[] };
         });
     }
 
     getMachineInfo() {
         return this.send(0x01, 0x21, PeerId.CONTROLLER, Buffer.alloc(0)).then(({ response, packet }) => {
             const machineInfo = new MachineInfo().fromBuffer(response.data);
-            return { code: response.result, data: machineInfo as MachineInfo };
+            return { code: response.result, packet, data: machineInfo as MachineInfo };
         });
     }
 
@@ -282,8 +282,8 @@ export default class Business extends Dispatcher {
         });
     }
 
-    movementInstruction(direction: MoveDirection, distance: number) {
-        const info = new MovementInstruction(direction, distance);
+    movementInstruction(direction: MoveDirection, distance: number, speed: number) {
+        const info = new MovementInstruction(direction, distance, speed);
         return this.send(0x01, 0x34, PeerId.CONTROLLER, info.toBuffer()).then(({ response, packet }) => {
             return { response, packet, data: {} };
         });

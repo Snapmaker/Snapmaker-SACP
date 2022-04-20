@@ -1,4 +1,4 @@
-import { readBool, readFloat, readString, readUint32, readUint8, stringToBuffer, writeUint32, writeUint8 } from '../../helper';
+import { readBool, readUint32, readUint8, writeUint8 } from '../../helper';
 import { Serializable } from '../../Serializable';
 
 export default class CNCToolHeadInfo implements Serializable {
@@ -33,7 +33,7 @@ export default class CNCToolHeadInfo implements Serializable {
     }
 
     toBuffer(): Buffer {
-        const buffer = Buffer.alloc(1,0);
+        const buffer = Buffer.alloc(1, 0);
         writeUint8(buffer, 0, this.key);
         return buffer;
     }

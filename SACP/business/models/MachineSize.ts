@@ -26,6 +26,6 @@ export default class MachineSize implements Serializable {
         return {
             axisLength: this.axisLength,
             homeOffset: this.homeOffset
-        }
+        };
     }
 }

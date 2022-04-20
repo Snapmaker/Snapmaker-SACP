@@ -9,9 +9,9 @@ export default class LaserCalibration implements Serializable {
     }
 
     toBuffer(): Buffer {
-        const buffer = Buffer.alloc(1,0);
+        const buffer = Buffer.alloc(1, 0);
         writeUint8(buffer, 0, this.calibrationMode);
-        return buffer
+        return buffer;
     }
 
     fromBuffer() {

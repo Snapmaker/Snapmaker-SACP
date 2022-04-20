@@ -1,4 +1,4 @@
-import { readFloat, readUint8, writeFloat, writeUint8 } from '../../helper';
+import { readFloat, readUint8, writeFloat, writeUint8} from '../../helper';
 import { Serializable } from '../../Serializable';
 
 export enum MoveDirection {
@@ -20,9 +20,8 @@ export default class MovementInstruction implements Serializable {
         // writeUint8(buffer, 0, 1);
         // writeUint8(buffer, 1, this.direction);
         // writeFloat(buffer, 2, this.distance);
-        // writeInt16(buffer, 6, 1200);
         // console.log('nextOffset', buffer);
-        const buffer = Buffer.alloc(5);
+        const buffer = Buffer.alloc(8);
         writeUint8(buffer, 0, this.direction);
         writeFloat(buffer, 1, this.distance);
         return buffer;

@@ -33,7 +33,7 @@ export default class CncSpeedState implements Serializable {
     fromBuffer(buffer: Buffer) {
         this.key = readUint8(buffer, 0);
         this.runningState = readUint8(buffer, 1);
-        this.currentPower = readUint8 (buffer, 2);
+        this.currentPower = readUint8(buffer, 2);
         this.targetPower = readUint8(buffer, 3);
         this.currentSpeed = readInt32(buffer, 4);
         this.targetSpeed = readInt32(buffer, 8);

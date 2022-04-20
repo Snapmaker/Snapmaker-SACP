@@ -3,38 +3,36 @@ import { Serializable } from '../../Serializable';
 
 export default class Laserinfo implements Serializable {
     key: number;
-    
-    zoneList: any;
 
+    zoneList: any;
 
     constructor(key?: number, zoneList?: any) {
         this.key = key ?? 0;
-        this.zoneList = zoneList ?? []
-
+        this.zoneList = zoneList ?? [];
     }
 
     toBuffer(): Buffer {
-        const buffer = Buffer.alloc(1,0);
+        const buffer = Buffer.alloc(1, 0);
         writeUint8(buffer, 0, this.key);
-        return buffer
+        return buffer;
     }
 
     fromBuffer(buffer: Buffer) {
         this.key = readUint8(buffer, 0);
         const zenoCount = readUint8(buffer, 1);
         const zenoBuffer = buffer.slice(2);
-        const byteLength = 7
-        const zenoInfo :any = {}
+        const byteLength = 7;
+        const zenoInfo :any = {};
         for (let i = 0; i < zenoCount; i++) {
-            const zeno =  zenoBuffer.slice(byteLength*i, byteLength*(i+1))
-            const zoneIndex = readUint8(zeno, 0)
-            const currentTemperature = readFloat(zeno, 1)
-            const targetTemzperature = readInt16(zeno, 5)
-            zenoInfo['zoneIndex'] = zoneIndex
-            zenoInfo['currentTemperature'] = currentTemperature
-            zenoInfo['targetTemzperature'] = targetTemzperature
-            this.zoneList.push(zenoInfo)
+            const zeno = zenoBuffer.slice(byteLength * i, byteLength * (i + 1));
+            const zoneIndex = readUint8(zeno, 0);
+            const currentTemperature = readFloat(zeno, 1);
+            const targetTemzperature = readInt16(zeno, 5);
+            zenoInfo.zoneIndex = zoneIndex;
+            zenoInfo.currentTemperature = currentTemperature;
+            zenoInfo.targetTemzperature = targetTemzperature;
+            this.zoneList.push(zenoInfo);
         }
-        return this
+        return this;
     }
 }

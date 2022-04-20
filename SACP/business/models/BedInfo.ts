@@ -14,8 +14,8 @@ export default class BedInfo implements Serializable {
     }
 
     fromBuffer(buffer: Buffer): any {
-        this.key = readUint8(buffer,0);
-        const count = readUint8(buffer,1);
+        this.key = readUint8(buffer, 0);
+        const count = readUint8(buffer, 1);
         for (let i = 0; i < count; i++) {
             const zoneInfo = new ZoneInfo().fromBuffer(buffer.slice(2 + i * 7));
             this.zoneInfo.push(zoneInfo);
