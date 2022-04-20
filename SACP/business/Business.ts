@@ -282,8 +282,8 @@ export default class Business extends Dispatcher {
         });
     }
 
-    movementInstruction(direction: MoveDirection, distance: number) {
-        const info = new MovementInstruction(direction, distance);
+    movementInstruction(direction: MoveDirection, distance: number, speed: number) {
+        const info = new MovementInstruction(direction, distance, speed);
         return this.send(0x01, 0x34, PeerId.CONTROLLER, info.toBuffer()).then(({ response, packet }) => {
             return { response, packet, data: {} };
         });
