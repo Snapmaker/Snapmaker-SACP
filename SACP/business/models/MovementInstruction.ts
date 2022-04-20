@@ -1,4 +1,4 @@
-import { readFloat, readUint8, writeFloat, writeUint8, writeInt16 } from '../../helper';
+import { readFloat, readUint8, writeFloat, writeUint8} from '../../helper';
 import { Serializable } from '../../Serializable';
 
 export enum MoveDirection {
