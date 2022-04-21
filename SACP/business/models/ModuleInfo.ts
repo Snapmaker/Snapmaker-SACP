@@ -1,5 +1,4 @@
 // https://snapmaker2.atlassian.net/wiki/spaces/SNAP/pages/1984824794/Re?focusedCommentId=2001966795#Data-Format.1
-
 import { readString, readUint16, readUint32, readUint8 } from '../../helper';
 import { Serializable } from '../../Serializable';
 
@@ -31,7 +30,9 @@ export default class ModuleInfo implements Serializable {
 
     moduleFirmwareVersion: string;
 
-    constructor(key?: number, moduleId?: number, moduleIndex?: ModuleIndex, moduleState?: ModuleState,serialNumber?: number, hardwareVersion?: number, moduleFirmwareVersion?: string) {
+    byteLength: number;
+
+    constructor(key?: number, moduleId?: number, moduleIndex?: ModuleIndex, moduleState?: ModuleState, serialNumber?: number, hardwareVersion?: number, moduleFirmwareVersion?: string) {
         this.key = key ?? 0;
         this.moduleId = moduleId ?? 0;
         this.moduleIndex = moduleIndex ?? FMDIndex.LEFT;
@@ -39,6 +40,7 @@ export default class ModuleInfo implements Serializable {
         this.serialNumber = serialNumber ?? 0;
         this.hardwareVersion = hardwareVersion ?? 0;
         this.moduleFirmwareVersion = moduleFirmwareVersion ?? '';
+        this.byteLength = 0;
     }
 
     toBuffer(): Buffer {
@@ -52,12 +54,14 @@ export default class ModuleInfo implements Serializable {
         this.moduleState = readUint8(buffer, 4) as ModuleState;
         this.serialNumber = readUint32(buffer, 5);
         this.hardwareVersion = readUint8(buffer, 9);
-        this.moduleFirmwareVersion = readString(buffer, 10).result;
+        const result = readString(buffer, 10);
+        this.moduleFirmwareVersion = result.result;
+        this.byteLength = result.nextOffset;
         return this;
     }
 
     getByteLength() {
-        return 10 + 2 + Buffer.from(this.moduleFirmwareVersion).byteLength;
+        return this.byteLength;
     }
 
     static parseArray(buffer: Buffer) {
