@@ -9,7 +9,7 @@ export default class BedInfo implements Serializable {
 
     toBuffer(): Buffer {
         // TODO
-        const buffer = Buffer.alloc(0);
+        const buffer =  Buffer.alloc(1, this.key);
         return buffer;
     }
 
