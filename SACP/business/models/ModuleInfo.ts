@@ -1,5 +1,4 @@
 // https://snapmaker2.atlassian.net/wiki/spaces/SNAP/pages/1984824794/Re?focusedCommentId=2001966795#Data-Format.1
-
 import { readString, readUint16, readUint32, readUint8 } from '../../helper';
 import { Serializable } from '../../Serializable';
 
