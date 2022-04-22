@@ -465,7 +465,7 @@ export default class Business extends Dispatcher {
     }
 
     uploadFile(filePath: string) {
-        const sizePerChunk = 1000;
+        const sizePerChunk = 60 * 1024;
         this.setHandler(0xb0, 0x01, (data) => {
             console.log(data.param);
             const { nextOffset, result: md5HexStr } = readString(data.param);
@@ -493,7 +493,7 @@ export default class Business extends Dispatcher {
                 const chunkBuffer = stringToBuffer(finalBuf as unknown as string);
 
                 buffer = Buffer.concat([Buffer.alloc(1, 0), md5Buffer, indexBuffer, chunkBuffer]);
-                console.log('>--', buffer);
+                // console.log('>--', buffer);
                 this.ack(0xb0, 0x01, data.packet, buffer);
             });
             inputStream.once('error', () => {
