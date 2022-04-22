@@ -21,7 +21,7 @@ export default class MovementInstruction implements Serializable {
         // writeUint8(buffer, 1, this.direction);
         // writeFloat(buffer, 2, this.distance);
         // console.log('nextOffset', buffer);
-        const buffer = Buffer.alloc(8);
+        const buffer = Buffer.alloc(5);
         writeUint8(buffer, 0, this.direction);
         writeFloat(buffer, 1, this.distance);
         return buffer;
