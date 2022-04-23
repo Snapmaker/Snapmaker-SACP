@@ -21,8 +21,8 @@ export default class ExtruderOffset implements Serializable {
 
     toBuffer(): Buffer {
         const buffer = Buffer.alloc(1 + 1 + 1 + 1 + 4, 0);
-        writeUint8(buffer, 0, 1); // array length
-        writeUint8(buffer, 1, this.key);
+        writeUint8(buffer, 0, this.key);
+        writeUint8(buffer, 1, 1); // array length
         writeUint8(buffer, 2, this.index);
         writeUint8(buffer, 3, this.direction);
         writeFloat(buffer, 4, this.distance);

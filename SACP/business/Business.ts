@@ -390,7 +390,7 @@ export default class Business extends Dispatcher {
     GetFDMInfo(key: number) {
         const info = new FdmToolHeadInfo(key);
         return this.send(0x10, 0x01, PeerId.CONTROLLER, info.toBuffer()).then(({ response, packet }) => {
-            // console.log('FDM',info.toBuffer,response,packet)
+            // console.log('FDMSubCase',info.toBuffer,response,packet)
             const getFDMInfo = new FdmToolHeadInfo().fromBuffer(response.data);
             return { response, packet, data: { getFDMInfo } };
         });
