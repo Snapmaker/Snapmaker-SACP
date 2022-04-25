@@ -79,6 +79,11 @@ export default class Dispatcher extends EventEmitter {
         this.handlerMap.set(businessId, callback);
     }
 
+    unsetHandler(commandSet: number, commandId: number) {
+        const businessId = commandSet * 256 + commandId;
+        this.handlerMap.delete(businessId);
+    }
+
     send(commandSet: number, commandId: number, peerId: PeerId = PeerId.CONTROLLER, payload: Buffer) {
         if (this.communication) {
             const header = new Header();
