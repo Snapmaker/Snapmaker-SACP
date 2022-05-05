@@ -56,7 +56,7 @@ export default class FdmToolHeadInfo implements Serializable {
             extruderInfo.targetTemperature = targetTemperature;
             this.extruderList.push(extruderInfo);
         }
-        const fanCount = readUint8(buffer, extruderCount * extrudeByteLength);
+        const fanCount = readUint8(buffer, extruderCount * extrudeByteLength + 4);
         const fanBuffer = buffer.slice(extruderCount * extrudeByteLength + 1 + 4);
         // The length of information for one fan in the array is 3
         const fanByteLength = 3;
