@@ -40,4 +40,16 @@ export default class CoordinateInfo implements Serializable {
         }
         return result;
     }
+
+    static arrayToBuffer(arr: CoordinateInfo[]) {
+        const len = arr.length;
+        const buffer = Buffer.alloc(1 + len * CoordinateInfo.byteLength, 0);
+        let nextOffset = 0;
+        nextOffset = writeUint8(buffer, nextOffset, len);
+        for (let i = 0; i < len; i++) {
+            nextOffset = writeUint8(buffer, nextOffset, arr[i].key);
+            nextOffset = writeFloat(buffer, nextOffset, arr[i].value);
+        }
+        return buffer;
+    }
 }
