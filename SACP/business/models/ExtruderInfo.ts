@@ -16,9 +16,7 @@ export default class ExtruderInfo implements Serializable {
 
     fromBuffer(buffer: Buffer) {
         this.key = readUint8(buffer, 0);
-
         const extruderCount = readUint8(buffer, 1);
-        //数组内一个喷嘴的信息长度是17
         const extrudeByteLength = 17;
         const extruderBuffer = buffer.slice(2, extruderCount * extrudeByteLength + 4);
         for (let i = 0; i < extruderCount; i++) {
