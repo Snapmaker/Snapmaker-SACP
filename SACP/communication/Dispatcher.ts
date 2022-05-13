@@ -26,7 +26,9 @@ export default class Dispatcher extends EventEmitter {
 
     handlerMap: Map<number, RequestCallback>;
 
-    constructor(type: string, socket: any) {
+    writeLog: Function | undefined;
+
+    constructor(type: string, socket: any, writeLog: Function | undefined = undefined) {
         super();
         if (!socket) {
             throw new Error('missing socket');
@@ -48,6 +50,8 @@ export default class Dispatcher extends EventEmitter {
         this.communication.on('request', (packet) => {
             this.packetHandler(packet);
         });
+
+        this.writeLog = writeLog;
     }
 
     dispose() {
@@ -95,6 +99,7 @@ export default class Dispatcher extends EventEmitter {
             header.sequence = this.communication.getSequence();
 
             const packet = new Packet(header, payload);
+            this.writeLog && this.writeLog(`Send: ${packet.toBuffer().toString('hex')}`);
             // console.log('send before send:', packet.toBuffer());
             return this.communication.send(packet.toBuffer()).then(resPacket => {
                 const response = new Response().fromBuffer(resPacket!.payload);
