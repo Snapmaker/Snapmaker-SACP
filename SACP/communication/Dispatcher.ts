@@ -68,6 +68,7 @@ export default class Dispatcher extends EventEmitter {
         const commandId = packet.header.commandId;
         const businessId = commandSet * 256 + commandId;
         // this is a notification
+        console.log('packetHandler', this.eventNames(), this.listenerCount(`${businessId}`), `${businessId}`);
         if (this.listenerCount(`${businessId}`) > 0) {
             const response = new Response().fromBuffer(packet.payload);
             this.emit(`${businessId}`, { response, packet } as ResponseData);
@@ -144,7 +145,6 @@ export default class Dispatcher extends EventEmitter {
 
     subscribe(commandSet: number, commandId: number, interval: number, callback: ResponseCallback) {
         const businessId = commandSet * 256 + commandId;
-
         if (this.listenerCount(`${businessId}`) > 0) {
             this.on(`${businessId}`, callback);
             return Promise.resolve({

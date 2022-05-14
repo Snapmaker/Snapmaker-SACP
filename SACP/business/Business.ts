@@ -116,6 +116,14 @@ export default class Business extends Dispatcher {
         return this.send(0x01, 0x31, PeerId.CONTROLLER, Buffer.alloc(1, coordinateType));
     }
 
+    getEmergencyStopInfo() {
+        return this.send(0x01, 0x3b, PeerId.CONTROLLER, Buffer.alloc(0)).then(({ response, packet }) => {
+            // const isTouch = readBool(response.data);
+            // console.log('emergencyResponse', response);
+            return { packet, data: response };
+        });
+    }
+
     takePhoto({ index = 0, x = 0, y = 0, z = 0, feedRate = 0, photoQuality = 0 }: RequestPhotoInfo) {
         const buffer = Buffer.alloc(16, 0);
         let nextOffset = 0;
@@ -282,6 +290,13 @@ export default class Business extends Dispatcher {
         });
     }
 
+    subscribeCurrentCoordinateInfo({ interval = 1000 }, callback: ResponseCallback) {
+        this.subscribe(0x01, 0xa2, interval, callback).then(({ response, packet }) => {
+            console.log('subscribeCoor');
+            return { response, packet, data: {} };
+        });
+    }
+
     movementInstruction(direction: MoveDirection, distance: number, speed: number) {
         const info = new MovementInstruction(direction, distance, speed);
         return this.send(0x01, 0x34, PeerId.CONTROLLER, info.toBuffer()).then(({ response, packet }) => {
@@ -394,11 +409,24 @@ export default class Business extends Dispatcher {
         });
     }
 
+    subscribeNozzleInfo({ interval = 1000 }, callback: ResponseCallback) {
+        return this.subscribe(0x10, 0xa0, interval, callback).then(({ response, packet }) => {
+            return { response, packet, data: {} };
+        });
+    }
+
     GetHotBed(key: number) {
         const info = new GetHotBed(key);
         return this.send(0x14, 0x01, PeerId.CONTROLLER, info.toBuffer()).then(({ response, packet }) => {
             const hotBedInfo = new GetHotBed().fromBuffer(response.data);
             return { response, packet, data: { hotBedInfo } };
+        });
+    }
+
+    subscribeHotBedTemperature({ interval = 1000 }, callback: ResponseCallback) {
+        this.subscribe(0x14, 0xa0, interval, callback).then(({ response, packet }) => {
+            console.log('hotBED', response);
+            return { response, packet, data: {} };
         });
     }
 
