@@ -375,7 +375,6 @@ export default class Business extends Dispatcher {
         });
     }
 
-    //主控主控设置到ESP32的蓝牙mac给屏幕未实现
 
     SetLaserLock(key: number, lockStatus: number) {
         const tobuffer = Buffer.alloc(1 + 1, 0);
@@ -386,7 +385,6 @@ export default class Business extends Dispatcher {
         });
     }
 
-    //调试中。。。
     GetFDMInfo(key: number) {
         const info = new FdmToolHeadInfo(key);
         return this.send(0x10, 0x01, PeerId.CONTROLLER, info.toBuffer()).then(({ response, packet }) => {
