@@ -41,13 +41,13 @@ describe('business', () => {
         business.subscribeHeartbeat({
             interval: 500
         }, callback)
-            .then(({ response }) => {
-                assert.equal(response.result, 0)
+            .then(({ code }) => {
+                assert.equal(code, 0)
             })
             .then(() => {
                 setTimeout(() => {
-                    business.unsubscribeHeartbeat(callback).then(({ response }) => {
-                        assert.equal(response.result, 0)
+                    business.unsubscribeHeartbeat(callback).then(({ code }) => {
+                        assert.equal(code, 0)
                         done()
                     })
                 }, 600)
@@ -57,21 +57,21 @@ describe('business', () => {
     describe('query', () => {
         it('getModuleInfo() should work', (done) => {
             business.getModuleInfo().then(res => {
-                assert.equal(res.response.result, 0)
+                assert.equal(res.code, 0)
                 done()
             })
         })
 
         xit('getCurrentCoordinateInfo() should work', (done) => {
-            business.getCurrentCoordinateInfo().then(res => {
-                assert.equal(res.response.result, 0)
+            business.getCurrentCoordinateInfo().then(({ response }) => {
+                assert.equal(response.result, 0)
                 done()
             })
         })
 
         it('getMachineInfo() should work', (done) => {
             business.getMachineInfo().then(res => {
-                assert.equal(res.response.result, 0)
+                assert.equal(res.code, 0)
                 done()
             })
         })
@@ -108,10 +108,10 @@ describe('business', () => {
                     done()
                 }
             });
-            business.startPrint('0511f187b7b572dc82d1323f660e5472', 'index.gcode')
-                .then(({ response, batchBufferInfo }) => {
-                    console.log(response, batchBufferInfo)
-                    // assert.equal(response.result, 0)
+            business.startPrint('0511f187b7b572dc82d1323f660e5472', 'index.gcode', 0)
+                .then(({ response }) => {
+                    // console.log(response, batchBufferInfo)
+                    assert.equal(response.result, 0)
                 })
         })
     })
