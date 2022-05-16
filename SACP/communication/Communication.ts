@@ -113,9 +113,14 @@ export default class Communication extends EventEmitter {
                 }
             } else {
                 this.receiveBuffer = Buffer.concat([this.receiveBuffer, buffer.slice(0, this.remainLength)]);
+                const nextBuffer = buffer.slice(this.remainLength);
                 this.remainLength = 0;
                 this.receiving = false;
                 this.reolvePacketBuffer();
+
+                if (nextBuffer && nextBuffer.length > 0) {
+                    this.receive(nextBuffer);
+                }
             }
         }
     }
@@ -142,17 +147,7 @@ export default class Communication extends EventEmitter {
                     this.emit('request', new Packet().fromBuffer(this.receiveBuffer));
                 }
             } else if (attribute === Attribute.REQUEST) {
-                // const sequence = this.receiveBuffer.readUInt16LE(9);
-                // const handler = this.requestHandlerMap.get(sequence);
-                // if (handler) {
-                //     // ack a sent request, this is wrong, need fix from Master Controller
-                //     handler.success(new Packet().fromBuffer(this.receiveBuffer));
-                //     this.requestHandlerMap.delete(sequence);
-                // } else {
-                // request packet
-                // console.log('reolvePacketBuffer', this.receiveBuffer);
                 this.emit('request', new Packet().fromBuffer(this.receiveBuffer));
-                // }
             }
         }
         this.receiveBuffer = Buffer.alloc(0);
