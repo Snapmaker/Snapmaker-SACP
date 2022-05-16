@@ -50,7 +50,6 @@ describe('communication', () => {
             const buf3 = Buffer.from([0xaa, 0x55, 0x0a, 0x00, 0x01, 0x00, 0x54, 0x01, 0x01, 0xa5, 0xa5, 0x01, 0xa0, 0x00, 0x00, 0xb9, 0x57])
             let num = 0
             communication.on('request', (packet: Packet) => {
-                console.log(packet)
                 num++
                 if (num === 1) {
                     assert.deepEqual(buf1, packet.toBuffer())
@@ -66,6 +65,43 @@ describe('communication', () => {
                 }
             })
             communication.receive(Buffer.concat([buf1, buf2, buf3]))
+        })
+        it.only('a packet for combined multi buffer#2', (done) => {
+            const buf1 = Buffer.from([0xaa, 0x55, 0x2d, 0x00, 0x01, 0x00, 0xf8, 0x01, 0x01, 0xa5, 0xa5, 0x10, 0xa0, 0x00, 0x07, 0x02, 0x00, 0x01, 0x01, 0x61, 0x14, 0x00, 0x00, 0x00, 0x00, 0x7c, 0x92, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x11, 0x14, 0x00, 0x00, 0x00, 0x00, 0xd4, 0x7b, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x24, 0xd7])
+            const buf2 = Buffer.from([0xaa, 0x55, 0x0a, 0x00, 0x01, 0x00, 0x54, 0x01, 0x01, 0xa5, 0xa5, 0x01, 0xa0, 0x00, 0x00, 0xb9, 0x57])
+            const buf3 = Buffer.from([0xaa, 0x55, 0x2d, 0x00, 0x01, 0x00, 0xf8, 0x01, 0x01, 0xa5, 0xa5, 0x10, 0xa0, 0x00, 0x07, 0x02, 0x00, 0x01, 0x01, 0x61, 0x14, 0x00, 0x00, 0x00, 0x00, 0x7c, 0x92, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x11, 0x14, 0x00, 0x00, 0x00, 0x00, 0xd4, 0x7b, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x24, 0xd7])
+            let num = 0
+            communication.on('request', (packet: Packet) => {
+                num++
+                if (num === 1) {
+                    assert.deepEqual(buf1, packet.toBuffer())
+                }
+                if (num === 2) {
+                    assert.deepEqual(buf2, packet.toBuffer())
+                }
+                if (num === 3) {
+                    assert.deepEqual(buf3, packet.toBuffer())
+                }
+                if (num === 4) {
+                    assert.deepEqual(buf1, packet.toBuffer())
+                }
+                if (num === 5) {
+                    assert.deepEqual(buf2, packet.toBuffer())
+                }
+                // console.log('num', num)
+                if (num >= 5) {
+                    done()
+                }
+            })
+            const halfBuf2_1 = buf2.slice(0, buf2.length / 2)
+            const halfBuf2_2 = buf2.slice(buf2.length / 2)
+
+            const halfBuf3_1 = buf3.slice(0, buf3.length / 2)
+            const halfBuf3_2 = buf3.slice(buf3.length / 2)
+            // console.log(halfBuf2_1, halfBuf2_2)
+            communication.receive(Buffer.concat([buf1, halfBuf2_1]))
+            communication.receive(Buffer.concat([halfBuf2_2, halfBuf3_1]))
+            communication.receive(Buffer.concat([halfBuf3_2, buf1, buf2]))
         })
         it('incorrect buffer contains packet SOF', () => {
             communication.receive(Buffer.from([0xaa, 0x55, 0x00]))
