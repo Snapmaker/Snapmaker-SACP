@@ -214,6 +214,7 @@ export default class Business extends Dispatcher {
 
         coordinateInfos.forEach(item => {
             const m = new CoordinateInfo(item.key, item.value).toBuffer();
+            console.log('buffer', m);
             buffer = Buffer.concat([buffer, m]);
         });
         return this.send(0x01, 0x32, PeerId.CONTROLLER, buffer);
@@ -291,8 +292,7 @@ export default class Business extends Dispatcher {
     }
 
     subscribeCurrentCoordinateInfo({ interval = 1000 }, callback: ResponseCallback) {
-        this.subscribe(0x01, 0xa2, interval, callback).then(({ response, packet }) => {
-            console.log('subscribeCoor');
+        return this.subscribe(0x01, 0xa2, interval, callback).then(({ response, packet }) => {
             return { response, packet, data: {} };
         });
     }
@@ -306,6 +306,14 @@ export default class Business extends Dispatcher {
 
     requestHome(number: number = 0) {
         return this.send(0x01, 0x35, PeerId.CONTROLLER, Buffer.alloc(1, number)).then(({ response, packet }) => {
+            return { response, packet, data: {} };
+        });
+    }
+
+    requestAbsoluteCooridateMove(directions: MoveDirection[] = [0], distances: number[] = [0], jogSpeed: number = 0.1, coordinateType: CoordinateType) {
+        const paramBuffer = new MovementInstruction(directions[0], distances[0], jogSpeed, directions, distances, coordinateType).toArrayBuffer();
+        console.log('absolute', directions, distances, jogSpeed, paramBuffer);
+        return this.send(0x01, 0x34, PeerId.CONTROLLER, paramBuffer).then(({ response, packet }) => {
             return { response, packet, data: {} };
         });
     }
@@ -424,8 +432,7 @@ export default class Business extends Dispatcher {
     }
 
     subscribeHotBedTemperature({ interval = 1000 }, callback: ResponseCallback) {
-        this.subscribe(0x14, 0xa0, interval, callback).then(({ response, packet }) => {
-            console.log('hotBED', response);
+        return this.subscribe(0x14, 0xa0, interval, callback).then(({ response, packet }) => {
             return { response, packet, data: {} };
         });
     }
