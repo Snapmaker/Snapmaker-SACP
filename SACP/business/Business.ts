@@ -1,7 +1,11 @@
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
-import Dispatcher, { ResponseCallback, ResponseData } from '../communication/Dispatcher';
+// @ts-ignore
+import { includes } from 'lodash';
+// @ts-ignore
+import readline from 'linebyline';
+import Dispatcher, { ResponseCallback, ResponseData, RequestData } from '../communication/Dispatcher';
 import CoordinateSystemInfo from './models/CoordinateSystemInfo';
 import GcodeFileInfo from './models/GcodeFileInfo';
 import MachineInfo from './models/MachineInfo';
@@ -22,6 +26,9 @@ import CalibrationInfo from './models/CalibrationInfo';
 import DataStorage from '../../../../DataStorage';
 import CoordinateInfo from './models/CoordinateInfo';
 import LaserToolHeadInfo from './models/LaserToolHeadInfo';
+import BatchBufferInfo from './models/BatchBufferInfo';
+import PrintBatchGcode from './models/PrintBatchGcode';
+import Response from '../communication/Response';
 // @ts-ignore
 // import { pathWithRandomSuffix } from '../../../random-utils';
 // import CoordinateInfo from './models/CoordinateInfo';
@@ -114,6 +121,12 @@ export default class Business extends Dispatcher {
 
     updateCoordinate(coordinateType: CoordinateType) {
         return this.send(0x01, 0x31, PeerId.CONTROLLER, Buffer.alloc(1, coordinateType));
+    }
+
+    executeGcode(gcode: string) {
+        return this.send(0x01, 0x02, PeerId.CONTROLLER, stringToBuffer(gcode)).then(({ response, packet }) => {
+            return { response, packet, data: {} };
+        });
     }
 
     getEmergencyStopInfo() {
@@ -578,6 +591,37 @@ export default class Business extends Dispatcher {
             } else {
                 reject(new Error(`can not upload missing file: ${filePath}`));
             }
+        });
+    }
+
+    startPrintSerial(filePath: string, callback: any) {
+        const content: string[] = [];
+        let elapsedTime = 0;
+        const rl = readline(filePath);
+        rl.on('line', (line: string) => {
+            line[0] !== ';' && content.push(`${line}\n`);
+            if (includes(line, ';estimated_time(s)')) {
+                elapsedTime = parseFloat(line.slice(19));
+            }
+        }).on('error', (e: any) => {
+            console.log('e', e);
+        });
+        console.log(content);
+        this.setHandler(0xac, 0x02, async ({ param, packet }: RequestData) => {
+            const batchBufferInfo = new BatchBufferInfo().fromBuffer(param);
+            // const content = await readGcodeFileByLines(filePath);
+            console.log('lineNumber', batchBufferInfo.lineNumber, content.length);
+            let result = 0;
+            const printBatchGcode = new PrintBatchGcode(batchBufferInfo.lineNumber, batchBufferInfo.lineNumber, content[batchBufferInfo.lineNumber]);
+            if (batchBufferInfo.lineNumber === content.length - 1) {
+                result = 201;
+            }
+            const res = new Response(result, printBatchGcode.toBuffer());
+            this.ack(0xac, 0x02, packet, res.toBuffer());
+            callback && callback({ lineNumber: batchBufferInfo.lineNumber, length: content.length, elapsedTime });
+        });
+        this.setHandler(0xac, 0x01, (request: RequestData) => {
+            console.log({ request });
         });
     }
 }
