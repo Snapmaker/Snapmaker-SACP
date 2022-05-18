@@ -29,7 +29,7 @@ export default class ExtruderInfo implements Serializable {
             const type = readUint8(extruder, 4);
             const diameter = readFloat(extruder, 5);
             const currentTemperature = readFloat(extruder, 9);
-            const targetTemperature = readUint16(extruder, 13);
+            const targetTemperature = readFloat(extruder, 13);
             extruderInfo.index = index;
             extruderInfo.filamentStatus = filamentStatus;
             extruderInfo.materiaDetection = materiaDetection;
