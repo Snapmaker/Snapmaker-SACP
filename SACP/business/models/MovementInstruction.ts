@@ -1,11 +1,13 @@
 import { readFloat, readUint8, writeFloat, writeInt16, writeInt8, writeUint8 } from '../../helper';
 import { Serializable } from '../../Serializable';
-import { CoordinateType } from '../Business';
 
 export enum MoveDirection {
     X1, Y1, Z1, A1, B1, C1, X2
 }
 
+export enum CoordinateType {
+    MACHINE, WORKSPACE
+}
 export default class MovementInstruction implements Serializable {
     direction: MoveDirection;
 

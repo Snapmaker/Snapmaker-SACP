@@ -25,6 +25,5 @@
     "typescript": "^4.6.2"
   },
   "dependencies": {
-    "linebyline": "^1.3.0"
   }
 }
