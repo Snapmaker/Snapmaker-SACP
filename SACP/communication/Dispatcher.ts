@@ -144,7 +144,6 @@ export default class Dispatcher extends EventEmitter {
 
     subscribe(commandSet: number, commandId: number, interval: number, callback: ResponseCallback) {
         const businessId = commandSet * 256 + commandId;
-
         if (this.listenerCount(`${businessId}`) > 0) {
             this.on(`${businessId}`, callback);
             return Promise.resolve({
