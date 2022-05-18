@@ -68,7 +68,6 @@ export default class Dispatcher extends EventEmitter {
         const commandId = packet.header.commandId;
         const businessId = commandSet * 256 + commandId;
         // this is a notification
-        // console.log('packetHandler', this.eventNames(), this.listenerCount(`${businessId}`), `${businessId}`);
         if (this.listenerCount(`${businessId}`) > 0) {
             const response = new Response().fromBuffer(packet.payload);
             this.emit(`${businessId}`, { response, packet } as ResponseData);

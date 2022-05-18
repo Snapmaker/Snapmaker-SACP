@@ -132,7 +132,6 @@ export default class Communication extends EventEmitter {
     }
 
     private reolvePacketBuffer() {
-        // console.log('data', this.receiveBuffer);
         if (this.validateChecksum(this.receiveBuffer)) {
             const attribute = this.receiveBuffer.readUInt8(8);
             if (attribute === Attribute.ACK) {
