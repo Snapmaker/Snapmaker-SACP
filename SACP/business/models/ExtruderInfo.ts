@@ -1,5 +1,5 @@
 import { Serializable } from '../../Serializable';
-import { readBool, readFloat, readUint16, readUint8 } from '../../helper';
+import { readBool, readFloat, readUint8 } from '../../helper';
 
 export default class ExtruderInfo implements Serializable {
     key: number = 0;
