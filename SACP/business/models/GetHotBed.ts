@@ -22,8 +22,8 @@ export default class Laserinfo implements Serializable {
         const zenoCount = readUint8(buffer, 1);
         const zenoBuffer = buffer.slice(2);
         const byteLength = 7;
-        const zenoInfo :any = {};
         for (let i = 0; i < zenoCount; i++) {
+            const zenoInfo :any = {};
             const zeno = zenoBuffer.slice(byteLength * i, byteLength * (i + 1));
             const zoneIndex = readUint8(zeno, 0);
             const currentTemperature = readFloat(zeno, 1);
