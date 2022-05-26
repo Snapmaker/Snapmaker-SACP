@@ -23,6 +23,6 @@ export default class WifiConnectionInfo implements Serializable {
     }
 
     fromBuffer(buffer: Buffer) {
-        return buffer;
+        throw new Error('Method not implemented.');
     }
 }
