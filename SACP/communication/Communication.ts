@@ -4,11 +4,9 @@ import { calcChecksum, calcCRC8 } from '../helper';
 import { Attribute } from './Header';
 import Packet from './Packet';
 
-let globalSequence: number = 0;
-
 type RequestHandler = {
     startTime: number,
-    success: Function,
+    success: (pkt: Packet) => void,
     fail: Function
 };
 
@@ -19,11 +17,13 @@ export default class Communication extends EventEmitter {
 
     private remainLength: number = 0;
 
-    private requestHandlerMap: Map<number, RequestHandler> = new Map();
+    private requestHandlerMap: Map<string, RequestHandler> = new Map();
 
     public timeout: number = 0;
 
     public connection: ConnectionInterface | null = null;
+
+    private sequence: number = 0;
 
     dispose() {
         this.receiveBuffer = Buffer.alloc(0);
@@ -34,12 +34,12 @@ export default class Communication extends EventEmitter {
         this.connection = null;
     }
 
-    static resetSequence() {
-        globalSequence = 0;
+    resetSequence() {
+        this.sequence = 0;
     }
 
-    static setInitialSequence(num: number) {
-        globalSequence = num;
+    setInitialSequence(num: number) {
+        this.sequence = num;
     }
 
     getReceiveBuffer() {
@@ -53,17 +53,17 @@ export default class Communication extends EventEmitter {
     }
 
     getSequence() {
-        globalSequence++;
-        globalSequence %= 0xffff;
-        return globalSequence;
+        this.sequence++;
+        this.sequence %= 0xffff;
+        return this.sequence;
     }
 
-    send(buffer: Buffer, needReply: boolean = true) {
+    send(requestId: string, buffer: Buffer, needReply: boolean = true) {
         if (buffer.length >= 15) {
             if (needReply) {
                 return new Promise<Packet>((resolve, reject) => {
                     // empty payload buffer should be length of 15
-                    this.requestHandlerMap.set(globalSequence, {
+                    this.requestHandlerMap.set(requestId, {
                         startTime: Date.now(),
                         success: resolve,
                         fail: reject
@@ -133,21 +133,26 @@ export default class Communication extends EventEmitter {
 
     private reolvePacketBuffer() {
         if (this.validateChecksum(this.receiveBuffer)) {
-            const attribute = this.receiveBuffer.readUInt8(8);
+            const packet = new Packet().fromBuffer(this.receiveBuffer);
+            const attribute = packet.header.attribute;
             if (attribute === Attribute.ACK) {
-                const sequence = this.receiveBuffer.readUInt16LE(9);
-                const handler = this.requestHandlerMap.get(sequence);
+                const sequence = packet.header.sequence;
+                const commandSet = packet.header.commandSet;
+                const commandId = packet.header.commandId;
+                const businessId = commandSet * 256 + commandId;
+                const requestId = `${businessId}-${sequence}`;
+                const handler = this.requestHandlerMap.get(requestId);
                 if (handler) {
                     // console.log('reolvePacketBuffer', this.receiveBuffer);
                     // ACK packet related to request
-                    handler.success(new Packet().fromBuffer(this.receiveBuffer));
-                    this.requestHandlerMap.delete(sequence);
+                    handler.success(packet);
+                    this.requestHandlerMap.delete(requestId);
                 } else {
                     // notification packet
-                    this.emit('request', new Packet().fromBuffer(this.receiveBuffer));
+                    this.emit('request', packet);
                 }
             } else if (attribute === Attribute.REQUEST) {
-                this.emit('request', new Packet().fromBuffer(this.receiveBuffer));
+                this.emit('request', packet);
             }
         }
         this.receiveBuffer = Buffer.alloc(0);
