@@ -55,6 +55,7 @@ describe('communication', () => {
             assert.deepEqual(buf, data, 'send wrong buffer')
             done()
         })
-        communication.send(buf)
+        const requestId = 'fakeRequestId';
+        communication.send(requestId, buf)
     })
 })
