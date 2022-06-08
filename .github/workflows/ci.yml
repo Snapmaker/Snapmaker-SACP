@@ -1,0 +1,17 @@
+name: CI
+
+on: [pull_request]
+
+jobs:
+  unit-test:
+    name: Run unit test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup Node.js Env
+        uses: actions/setup-node@v2
+        with:
+            node-version: '12.x'
+
+      - run: npm install
+      - run: npm test

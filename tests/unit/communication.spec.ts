@@ -140,4 +140,14 @@ describe('communication', () => {
             chai.spy.restore(connection)
         })
     })
+
+    describe('#end()', () => {
+        it('should end correctly', () => {
+            const buf = Buffer.from([0xaa, 0x55, 0x0c, 0x00, 0x02, 0x01, 0x18, 0x02, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0xa0, 0xe8, 0x03])
+            communication.receive(buf)
+            assert.deepEqual(communication.getReceiveBuffer(), buf)
+            communication.end()
+            assert.deepEqual(communication.getReceiveBuffer(), Buffer.alloc(0))
+        })
+    })
 })
