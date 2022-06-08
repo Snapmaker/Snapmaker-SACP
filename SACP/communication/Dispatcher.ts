@@ -62,6 +62,12 @@ export default class Dispatcher extends EventEmitter {
         this.handlerMap.clear();
     }
 
+    resetBuffer() {
+        if (this.communication) {
+            this.communication.end();
+        }
+    }
+
     // handle request from Controller or Screen
     private packetHandler(packet: Packet) {
         const businessId = this.evalBusinessId(packet.header.commandSet, packet.header.commandId);
