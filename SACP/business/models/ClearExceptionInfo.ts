@@ -2,7 +2,7 @@ import { readUint16, readUint8 } from '../../helper';
 import { Serializable } from '../../Serializable';
 
 export default class ClearExceptionInfo implements Serializable {
-    ExceptionInfo: number[];
+    ExceptionInfo: any[];
 
     MachineBehaviorState: number[];
 
