@@ -131,17 +131,9 @@ export default class Dispatcher extends EventEmitter {
 
             const packet = new Packet(header, payload);
             this.writeLog && this.writeLog(`Ack: ${packet.toBuffer().toString('hex')}`);
-<<<<<<< HEAD
             // console.log('ack before send:', packet.toBuffer());
             const businessId = this.evalBusinessId(commandSet, commandId);
             return this.communication.send(`${businessId}-${header.sequence}`, packet.toBuffer(), false);
-=======
-            return this.communication.send(packet.toBuffer(), false);
-            // .then(resPacket => {
-            //     const response = new Response().fromBuffer(resPacket.payload);
-            //     return { response, packet: resPacket } as ResponseData;
-            // });
->>>>>>> 8378ee6 (Feature: Add MovementModuleInfo Model)
         }
         return Promise.reject(new Error('communication not initialize'));
     }
@@ -186,11 +178,7 @@ export default class Dispatcher extends EventEmitter {
         const payload = Buffer.from([commandSet, commandId]);
         return this.send(0x01, 0x01, PeerId.CONTROLLER, payload).then((res) => {
             if (res.response?.result === 0) {
-<<<<<<< HEAD
                 const businessId = `${this.evalBusinessId(commandSet, commandId)}`;
-=======
-                const businessId = `${commandSet * 256 + commandId}`;
->>>>>>> 8378ee6 (Feature: Add MovementModuleInfo Model)
                 if (this.listenerCount(businessId) > 1) {
                     this.removeListener(businessId, callback);
                 } else {
