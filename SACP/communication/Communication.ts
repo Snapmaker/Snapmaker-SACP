@@ -81,46 +81,69 @@ export default class Communication extends EventEmitter {
 
     receive(buffer: Buffer) {
         if (!this.receiving) {
-            for (let i = 0; i < buffer.byteLength - 1; i++) {
-                if (buffer[i] === 0xaa && buffer[i + 1] === 0x55) {
-                    const crc8 = calcCRC8(buffer, i, 6);
-                    if (crc8 === buffer[i + 6]) {
-                        this.receiving = true;
-                        const length = buffer.readUInt16LE(i + 2);
-                        if (i + 7 + length <= buffer.byteLength) {
-                            this.receiveBuffer = Buffer.concat([this.receiveBuffer, buffer.slice(i, i + 7 + length)]);
-                            this.remainLength = 0;
-                            this.receiving = false;
-                            this.reolvePacketBuffer();
-                            i = i + 7 + length - 1;
-                            continue;
+            let isIncompleteBuffer = true, bufIndex = 0;
+            if (buffer.byteLength >= 7) { // buffer contains required bytes to indentify it is SACP buffer or not
+                isIncompleteBuffer = false;
+                for (let i = 0; i < buffer.byteLength - 1; i++) {
+                    if (buffer[i] === 0xaa && buffer[i + 1] === 0x55) {
+                        if (buffer.byteLength >= i + 7) {
+                            const crc8 = calcCRC8(buffer, i, 6);
+                            if (crc8 === buffer[i + 6]) {
+                                this.receiving = true;
+                                const length = buffer.readUInt16LE(i + 2);
+                                if (i + 7 + length <= buffer.byteLength) {
+                                    this.receiveBuffer = Buffer.concat([this.receiveBuffer, buffer.slice(i, i + 7 + length)]);
+                                    this.remainLength = 0;
+                                    this.receiving = false;
+                                    this.reolvePacketBuffer();
+                                    i = i + 7 + length - 1;
+                                    continue;
+                                } else {
+                                    this.remainLength = length - (buffer.byteLength - i) + 7;
+                                    this.receiveBuffer = Buffer.concat([this.receiveBuffer, buffer.slice(i, buffer.byteLength)]);
+                                    break;
+                                }
+                            }
                         } else {
-                            this.remainLength = length - (buffer.byteLength - i) + 7;
-                            this.receiveBuffer = Buffer.concat([this.receiveBuffer, buffer.slice(i, buffer.byteLength)]);
+                            isIncompleteBuffer = true;
+                            bufIndex = i;
                             break;
                         }
                     }
                 }
             }
+            if (isIncompleteBuffer) {
+                // received a incomplete buffer which can not identify the `length`
+                this.receiving = true;
+                this.remainLength = -1;
+                this.receiveBuffer = Buffer.concat([this.receiveBuffer, buffer.slice(bufIndex, buffer.byteLength)]);
+            }
         } else {
-            // receive bytes from next buffer
-            if (this.remainLength >= buffer.byteLength) {
-                this.receiveBuffer = Buffer.concat([this.receiveBuffer, buffer.slice(0, buffer.byteLength)]);
-                this.remainLength -= buffer.byteLength;
-                if (this.remainLength === 0) {
+            if (this.remainLength > 0) {
+                // receive bytes from next buffer
+                if (this.remainLength >= buffer.byteLength) {
+                    this.receiveBuffer = Buffer.concat([this.receiveBuffer, buffer.slice(0, buffer.byteLength)]);
+                    this.remainLength -= buffer.byteLength;
+                    if (this.remainLength === 0) {
+                        this.receiving = false;
+                        this.reolvePacketBuffer();
+                    }
+                } else {
+                    this.receiveBuffer = Buffer.concat([this.receiveBuffer, buffer.slice(0, this.remainLength)]);
+                    const nextBuffer = buffer.slice(this.remainLength);
+                    this.remainLength = 0;
                     this.receiving = false;
                     this.reolvePacketBuffer();
+    
+                    if (nextBuffer && nextBuffer.length > 0) {
+                        this.receive(nextBuffer);
+                    }
                 }
             } else {
-                this.receiveBuffer = Buffer.concat([this.receiveBuffer, buffer.slice(0, this.remainLength)]);
-                const nextBuffer = buffer.slice(this.remainLength);
-                this.remainLength = 0;
+                const combinedBuffer = Buffer.concat([this.receiveBuffer, buffer]);
                 this.receiving = false;
-                this.reolvePacketBuffer();
-
-                if (nextBuffer && nextBuffer.length > 0) {
-                    this.receive(nextBuffer);
-                }
+                this.receiveBuffer = Buffer.alloc(0);
+                this.receive(combinedBuffer);
             }
         }
     }
@@ -143,7 +166,6 @@ export default class Communication extends EventEmitter {
                 const requestId = `${businessId}-${sequence}`;
                 const handler = this.requestHandlerMap.get(requestId);
                 if (handler) {
-                    // console.log('reolvePacketBuffer', this.receiveBuffer);
                     // ACK packet related to request
                     handler.success(packet);
                     this.requestHandlerMap.delete(requestId);
