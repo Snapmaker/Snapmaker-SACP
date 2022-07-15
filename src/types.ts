@@ -4,7 +4,7 @@ import Response from "./communication/Response";
 export type ResponseData = {
     response: Response;
     packet: Packet;
-    data?: unknown;
+    data?: Buffer;
 }
 
 export type RequestData = {
