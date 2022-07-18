@@ -58,6 +58,10 @@ export default class Communication extends EventEmitter {
         return this.sequence;
     }
 
+    getSequenceSame() {
+        return this.sequence;
+    }
+
     send(requestId: string, buffer: Buffer, needReply: boolean = true) {
         if (buffer.length >= 15) {
             if (needReply) {
