@@ -107,6 +107,28 @@ export default class Dispatcher extends EventEmitter {
         return Promise.reject(new Error('communication not initialize'));
     }
 
+    sendSequenceSame(commandSet: number, commandId: number, peerId: PeerId = PeerId.CONTROLLER, payload: Buffer) {
+        if (this.communication) {
+            const header = new Header();
+            header.length = payload.byteLength + 8;
+            header.commandSet = commandSet;
+            header.commandId = commandId;
+            header.attribute = Attribute.REQUEST;
+            header.receiverId = peerId;
+            header.sequence = this.communication.getSequenceSame();
+
+            const packet = new Packet(header, payload);
+            this.writeLog && this.writeLog(`Send: ${packet.toBuffer().toString('hex')}`);
+            // console.log('send before send:', packet.toBuffer());
+            const businessId = this.evalBusinessId(commandSet, commandId);
+            return this.communication.send(`${businessId}-${header.sequence}`, packet.toBuffer()).then(resPacket => {
+                const response = new Response().fromBuffer(resPacket!.payload);
+                return { response, packet: resPacket } as ResponseData;
+            });
+        }
+        return Promise.reject(new Error('communication not initialize'));
+    }
+
     ack(commandSet: number, commandId: number, requestPacket: Packet, payload: Buffer) {
         if (this.communication) {
             const header = new Header();
