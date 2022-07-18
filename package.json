@@ -1,11 +1,12 @@
 {
-  "name": "sacp",
-  "version": "1.0.0",
+  "name": "snapmaker-sacp-sdk",
+  "version": "0.0.6",
   "description": "",
-  "main": "index.js",
   "scripts": {
     "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register 'tests/**/*.ts'",
-    "start": "ts-node index.ts"
+    "start": "concurrently \"tsc -w\" \"tsc-alias -w\"",
+    "link": "npm run build && cd dist && npm link",
+    "build": "gulp"
   },
   "keywords": [],
   "author": "",
@@ -18,11 +19,15 @@
     "@types/serialport": "^8.0.2",
     "chai": "^4.3.6",
     "chai-spies": "^1.0.0",
+    "concurrently": "^7.2.2",
+    "del": "^6.1.1",
+    "gulp": "^4.0.2",
+    "gulp-shell": "^0.8.0",
     "mocha": "^9.2.1",
     "serialport": "^8.0.8",
     "ts-node": "^10.6.0",
+    "tsc-alias": "^1.6.11",
     "tslib": "^2.3.1",
     "typescript": "^4.6.2"
-  },
-  "dependencies": {}
+  }
 }

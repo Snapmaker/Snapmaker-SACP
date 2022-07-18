@@ -1,0 +1,13 @@
+src/
+tests/
+.github/
+logs/
+node_modules/
+.babelrc
+.cnpmrc
+.gitignore
+tsconfig.json
+.npmignore
+.npmrc
+.yarnrc
+**/*.log
