@@ -1,0 +1,34 @@
+name: public for dev
+
+on:
+  pull_request:
+    branches: [ "master" ]
+    types:
+      - closed
+
+jobs:
+  if_merged:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+            token: ${{ secrets.MY_TOKEN }}
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 12
+      - run: npm install
+      - run: npm build
+      - uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+          tag: dev
+          package: ./dist/package.json
+       - name: Setting Environment Variables
+        run: |
+          PACKAGE_VERSION=`node -e "console.log(require('./package.json').version)"`
+      - name: Commit report
+        run: |
+          git commit -am "Publish: ${{ env.PACKAGE_VERSION }}"
+          git push
+        
