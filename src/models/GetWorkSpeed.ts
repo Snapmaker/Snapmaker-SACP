@@ -1,5 +1,5 @@
-import { readUint8, readInt16 } from '@/helper';
-import { Serializable } from  '@/types';
+import { readUint8, readInt16, writeUint8 } from '@/helper';
+import { Serializable } from '@/types';
 
 export default class Laserinfo implements Serializable {
     key: number;
