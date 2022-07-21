@@ -1,8 +1,8 @@
 import assert from 'assert'
 import net from 'net'
-import Communication from '../../SACP/communication/Communication';
-import Packet from '../../SACP/communication/Packet';
-import TCPConnection from '../../SACP/connection/TCPConnection';
+import Communication from '../../src/communication/Communication';
+import Packet from '../../src/communication/Packet';
+import TCPConnection from '../../src/connection/TCPConnection';
 
 describe('communication', () => {
     let communication: Communication;

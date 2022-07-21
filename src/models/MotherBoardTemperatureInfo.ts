@@ -1,5 +1,5 @@
-import { readFloat, readUint8 } from '../../helper';
-import { Serializable } from '../../Serializable';
+import { readFloat, readUint8 } from '@/helper';
+import { Serializable } from '@/types';
 
 export default class ModuleInfo implements Serializable {
     motherBoardTemperatureInfo: any = [];
@@ -14,7 +14,7 @@ export default class ModuleInfo implements Serializable {
 
     fromBuffer(buffer: Buffer) {
         const len = readUint8(buffer, 0);
-        const info:any = [];
+        const info: any = [];
         for (let i = 0; i < len; i++) {
             info.index = readUint8(buffer, 1 + i * 5);
             info.temperature = readFloat(buffer, 2 + i * 5);

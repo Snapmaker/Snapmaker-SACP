@@ -1,5 +1,5 @@
-import { Serializable } from '../../Serializable';
-import { readBool, readUint8 } from '../../helper';
+import { Serializable } from '@/types';
+import { readBool, readUint8 } from '@/helper';
 
 export default class EndstopsInfo implements Serializable {
     EndstopsInfoList: any;
