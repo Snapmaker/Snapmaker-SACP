@@ -1,8 +1,8 @@
 import assert from 'assert'
 import chai from 'chai'
 import spies from 'chai-spies'
-import Communication from '../../SACP/communication/Communication'
-import Packet from '../../SACP/communication/Packet'
+import Communication from '../../src/communication/Communication'
+import Packet from '../../src/communication/Packet'
 
 chai.use(spies)
 
@@ -160,9 +160,9 @@ describe('communication', () => {
     describe('#send()', () => {
         it('should send correctly', () => {
             const connection = {
-                write() {},
-                read() {},
-                end() {}
+                write() { },
+                read() { },
+                end() { }
             }
             chai.spy.on(connection, ['write'])
 
