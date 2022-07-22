@@ -12,4 +12,3 @@ export {
     Serializable,
     helper
 };
-

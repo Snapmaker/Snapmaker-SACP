@@ -149,3 +149,4 @@ export function calcCRC8(buffer: Buffer, offset: number, length: number) {
     crc &= 0xff;
     return crc;
 }
+
