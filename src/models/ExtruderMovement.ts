@@ -1,5 +1,5 @@
-import { writeFloat, writeUint8 } from '@/helper';
-import { Serializable } from '@/types';
+import { writeFloat, writeUint8 } from '../helper';
+import { Serializable } from '../types';
 
 export default class ExtruderMovement implements Serializable {
     key: number;

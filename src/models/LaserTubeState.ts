@@ -1,5 +1,5 @@
-import { readFloat } from '@/helper';
-import { Serializable } from '@/types';
+import { readFloat } from '../helper';
+import { Serializable } from '../types';
 
 export default class LaserTubeState implements Serializable {
     currentPower: number;

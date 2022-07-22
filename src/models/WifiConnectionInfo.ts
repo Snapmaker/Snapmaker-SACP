@@ -1,5 +1,5 @@
-import { stringToBuffer } from '@/helper';
-import { Serializable } from '@/types';
+import { stringToBuffer } from '../helper';
+import { Serializable } from '../types';
 
 export default class WifiConnectionInfo implements Serializable {
     hostName: string;

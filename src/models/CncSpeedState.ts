@@ -1,5 +1,5 @@
-import { readInt32, readUint8 } from '@/helper';
-import { Serializable } from '@/types';
+import { readInt32, readUint8 } from '../helper';
+import { Serializable } from '../types';
 
 export default class CncSpeedState implements Serializable {
     key: number;

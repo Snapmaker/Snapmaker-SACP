@@ -1,5 +1,5 @@
-import { readString, stringToBuffer } from '@/helper';
-import { Serializable } from '@/types';
+import { readString, stringToBuffer } from '../helper';
+import { Serializable } from '../types';
 
 export default class GcodeFileInfo implements Serializable {
     md5: string;

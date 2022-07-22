@@ -6,7 +6,7 @@ import Packet from './Packet';
 import Header, { Attribute, PeerId } from './Header';
 import Response from './Response';
 import { writeUint16 } from '../helper';
-import { RequestCallback, RequestData, ResponseCallback } from '@/types';
+import { RequestCallback, RequestData, ResponseCallback } from '../types';
 import { ResponseData } from '..';
 
 export default class Dispatcher extends EventEmitter {

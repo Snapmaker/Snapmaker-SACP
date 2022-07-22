@@ -1,5 +1,5 @@
-import { readFloat, readUint8, writeFloat, writeInt16, writeInt8, writeUint8 } from '@/helper';
-import { Serializable } from '@/types';
+import { readFloat, readUint8, writeFloat, writeInt16, writeInt8, writeUint8 } from '../helper';
+import { Serializable } from '../types';
 
 export enum MoveDirection {
     X1, Y1, Z1, A1, B1, C1, X2

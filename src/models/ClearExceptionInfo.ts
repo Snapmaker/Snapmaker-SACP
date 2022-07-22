@@ -1,5 +1,5 @@
-import { readUint16, readUint8 } from '@/helper';
-import { Serializable } from '@/types';
+import { readUint16, readUint8 } from '../helper';
+import { Serializable } from '../types';
 
 export default class ClearExceptionInfo implements Serializable {
     ExceptionInfo: any[];

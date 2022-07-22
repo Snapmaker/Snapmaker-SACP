@@ -1,5 +1,5 @@
-import { readUint16, readUint32, writeUint16, writeUint32 } from '@/helper';
-import { Serializable } from '@/types';
+import { readUint16, readUint32, writeUint16, writeUint32 } from '../helper';
+import { Serializable } from '../types';
 
 export default class BatchBufferInfo implements Serializable {
     lineNumber: number;

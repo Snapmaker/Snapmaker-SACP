@@ -2,11 +2,10 @@
   "name": "snapmaker-sacp-sdk",
   "version": "0.0.8",
   "description": "",
-  "main": "./src/index",
+  "main": "./src/index.ts",
   "scripts": {
     "test": "mocha -r ts-node/register -r tsconfig-paths/register 'tests/**/*.ts'",
     "start": "concurrently \"tsc -w\" \"tsc-alias -w\"",
-    "link": "gulp test",
     "build": "gulp"
   },
   "keywords": [],

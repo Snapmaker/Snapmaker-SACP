@@ -1,5 +1,5 @@
-import { readInt16, readUint16, readUint32, readUint8, writeUint8 } from '@/helper';
-import { Serializable } from '@/types';
+import { readInt16, readUint16, readUint32, readUint8, writeUint8 } from '../helper';
+import { Serializable } from '../types';
 
 export class DryBoxStatus implements Serializable {
     dryState: number = 0;

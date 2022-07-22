@@ -1,5 +1,5 @@
-import { Serializable } from '@/types';
-import { calcChecksum, writeUint16 } from '@/helper';
+import { Serializable } from '../types';
+import { calcChecksum, writeUint16 } from '../helper';
 import Header from './Header';
 
 export default class Packet implements Serializable {

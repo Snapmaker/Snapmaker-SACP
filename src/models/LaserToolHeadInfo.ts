@@ -1,5 +1,5 @@
-import { readFloat, readUint8 } from '@/helper';
-import { Serializable } from '@/types';
+import { readFloat, readUint8 } from '../helper';
+import { Serializable } from '../types';
 
 class LaserTubeState implements Serializable {
     currentPower: number = 0;
