@@ -26,8 +26,11 @@ jobs:
         with:
           node-version: 12
 
-      - run: npm version prerelease --preid=alpha
-      
+      - run: |
+          git config --global user.email "dohard@163.COM"
+          git config --global user.name "dohard"
+          npm version prerelease --preid=alpha
+
       - run: npm install
 
       - run: npm run build
