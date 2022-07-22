@@ -7,37 +7,36 @@ on:
       - closed
 
 jobs:
-  Run-Publish:
-    if_merged:
-      if: github.event.pull_request.merged == true
-      runs-on: ubuntu-latest
-      steps:
-        - name: Checkout Code
-          uses: actions/checkout@v3
-          with:
-              token: ${{ secrets.MY_TOKEN }}
+  if_merged:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+            token: ${{ secrets.MY_TOKEN }}
 
-        - uses: actions/setup-node@v3
-          with:
-            node-version: 12
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 12
 
-        - run: npm install
+      - run: npm install
 
-        - run: npm build
+      - run: npm build
 
-        - name: Publish to npm
-          uses: JS-DevTools/npm-publish@v1
-          with:
-            token: ${{ secrets.NPM_TOKEN }}
-            tag: dev
-            package: ./dist/package.json
+      - name: Publish to npm
+        uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+          tag: dev
+          package: ./dist/package.json
 
-        - name: Setting Environment Variables
-          run: |
-            PACKAGE_VERSION=`node -e "console.log(require('./package.json').version)"`
+      - name: Setting Environment Variables
+        run: |
+          PACKAGE_VERSION=`node -e "console.log(require('./package.json').version)"`
 
-        - name: Commit report
-          run: |
-            git commit -am "Publish: ${{ env.PACKAGE_VERSION }}"
-            git push
+      - name: Commit report
+        run: |
+          git commit -am "Publish: ${{ env.PACKAGE_VERSION }}"
+          git push
           
