@@ -1,5 +1,5 @@
 #! /bin/bash
-npm version '0.0.'$(date +%Y%m%d%H%M)
+npm version prerelease --preid=alpha -m ":package:	%s"
 npm run build
 npm publish --tag dev ./dist/
 git push --no-verify
