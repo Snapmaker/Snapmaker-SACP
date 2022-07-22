@@ -29,7 +29,7 @@ jobs:
       - run: |
           git config --global user.email "dohard@163.COM"
           git config --global user.name "dohard"
-          npm version prerelease --preid=alpha
+          npm version prerelease --preid=alpha -m ":rocket:	%s"
 
       - run: npm install
 
@@ -42,12 +42,7 @@ jobs:
           tag: dev
           package: ./dist/package.json
 
-      - name: Setting Environment Variables
-        run: |
-          PACKAGE_VERSION=`node -e "console.log(require('./package.json').version)"`
-
       - name: Commit report
         run: |
-          git commit -am "Publish: ${{ env.PACKAGE_VERSION }}"
           git push
           
