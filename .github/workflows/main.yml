@@ -3,8 +3,11 @@ name: CI
 on:
   push:
     branches: 
-      - '**'
+      - 'test-ci'
+      - 'master'
   pull_request:
+    types:
+      - opened
     branches: [ "master" ]
 
 jobs:
