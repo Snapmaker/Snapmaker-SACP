@@ -1,10 +1,10 @@
-import Packet from "./communication/Packet";
-import Response from "./communication/Response";
+import Packet from './communication/Packet';
+import Response from './communication/Response';
 
 export type ResponseData = {
     response: Response;
     packet: Packet;
-    data?: Buffer;
+    data: Buffer;
 }
 
 export type RequestData = {

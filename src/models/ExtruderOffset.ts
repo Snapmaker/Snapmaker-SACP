@@ -6,13 +6,16 @@ export default class ExtruderOffset implements Serializable {
 
     index: number;
 
+    direction: number;
+
     distance: number;
 
     offsets: any[] = [];
 
-    constructor(key?: number, index?: number, distance?: number) {
+    constructor(key?: number, index?: number, direction?: number, distance?: number) {
         this.key = key ?? 0;
         this.index = index ?? 0;
+        this.direction = direction ?? 0;
         this.distance = distance ?? 0;
     }
 
