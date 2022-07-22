@@ -1,5 +1,5 @@
-import { readString, readUint32, stringToBuffer, writeUint32 } from '@/helper';
-import { Serializable } from '@/types';
+import { readString, readUint32, stringToBuffer, writeUint32 } from '../helper';
+import { Serializable } from '../types';
 
 export default class PrintBatchGcode implements Serializable {
     startLineNumber: number;

@@ -1,5 +1,5 @@
-import { readBool, readUint32, readUint8, writeUint8 } from '@/helper';
-import { Serializable } from '@/types';
+import { readBool, readUint32, readUint8, writeUint8 } from '../helper';
+import { Serializable } from '../types';
 
 export default class CNCToolHeadInfo implements Serializable {
     key: number;

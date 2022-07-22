@@ -1,5 +1,5 @@
-import { readBool, readUint8, writeUint8 } from '@/helper';
-import { Serializable } from '@/types';
+import { readBool, readUint8, writeUint8 } from '../helper';
+import { Serializable } from '../types';
 
 class TestStatus implements Serializable {
     workType: number = 0;

@@ -1,5 +1,5 @@
-import { Serializable } from '@/types';
-import { readFloat, readUint8 } from '@/helper';
+import { Serializable } from '../types';
+import { readFloat, readUint8 } from '../helper';
 
 export default class FdmZaxisHeight implements Serializable {
     pointIndex: number = 0;

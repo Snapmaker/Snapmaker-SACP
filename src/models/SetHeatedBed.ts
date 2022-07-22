@@ -1,5 +1,5 @@
-import { writeUint16, writeUint8 } from '@/helper';
-import { Serializable } from '@/types';
+import { writeUint16, writeUint8 } from '../helper';
+import { Serializable } from '../types';
 
 export default class SetHeatedBed implements Serializable {
     key: number;

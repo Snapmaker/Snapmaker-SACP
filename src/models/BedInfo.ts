@@ -1,6 +1,6 @@
-import { Serializable } from '@/types';
+import { Serializable } from '../types';
 import ZoneInfo from './ZoneInfo';
-import { readUint8 } from '@/helper';
+import { readUint8 } from '../helper';
 
 export default class BedInfo implements Serializable {
     key: number = 0;

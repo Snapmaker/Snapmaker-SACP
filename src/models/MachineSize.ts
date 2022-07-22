@@ -1,5 +1,5 @@
-import { readUint8 } from '@/helper';
-import { Serializable } from '@/types';
+import { readUint8 } from '../helper';
+import { Serializable } from '../types';
 import CoordinateInfo from './CoordinateInfo';
 
 export default class MachineSize implements Serializable {

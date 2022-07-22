@@ -1,5 +1,5 @@
-import { readBool, readFloat, readUint16, readUint8, writeUint8 } from '@/helper';
-import { Serializable } from '@/types';
+import { readBool, readFloat, readUint16, readUint8, writeUint8 } from '../helper';
+import { Serializable } from '../types';
 
 export default class FdmToolHeadInfo implements Serializable {
     key: number;

@@ -1,5 +1,5 @@
-import { readFloat, readUint8, writeFloat, writeUint8 } from '@/helper';
-import { Serializable } from '@/types';
+import { readFloat, readUint8, writeFloat, writeUint8 } from '../helper';
+import { Serializable } from '../types';
 
 export type Point = {
     x: number;

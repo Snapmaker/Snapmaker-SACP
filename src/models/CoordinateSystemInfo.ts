@@ -1,5 +1,5 @@
-import { readBool, readUint8 } from '@/helper';
-import { Serializable } from '@/types';
+import { readBool, readUint8 } from '../helper';
+import { Serializable } from '../types';
 import CoordinateInfo from './CoordinateInfo';
 
 export default class CoordinateSystemInfo implements Serializable {

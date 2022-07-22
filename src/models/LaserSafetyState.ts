@@ -1,5 +1,5 @@
-import { readFloat, readUint8 } from '@/helper';
-import { Serializable } from '@/types';
+import { readFloat, readUint8 } from '../helper';
+import { Serializable } from '../types';
 
 export default class LaserSafetyState implements Serializable {
     key: number;

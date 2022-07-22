@@ -1,4 +1,4 @@
-import { Serializable } from '@/types';
+import { Serializable } from '../types';
 import { readUint8, writeUint8 } from '../helper';
 
 export default class Response implements Serializable {

@@ -1,5 +1,5 @@
-import { writeUint8 } from '@/helper';
-import { Serializable } from '@/types';
+import { writeUint8 } from '../helper';
+import { Serializable } from '../types';
 
 export default class CncCalibration implements Serializable {
     calibrationMode: number;

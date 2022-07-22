@@ -1,5 +1,5 @@
-import { readBool, readUint8 } from '@/helper';
-import { Serializable } from '@/types';
+import { readBool, readUint8 } from '../helper';
+import { Serializable } from '../types';
 
 enum Axis {
     X1, Y1, Z1, A1, B1, C1, X2, E1, E2
