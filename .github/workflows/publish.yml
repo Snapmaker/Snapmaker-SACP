@@ -1,20 +1,14 @@
 name: public for dev
 
 on:
-  push:
-    branches: 
-      - '**'
   pull_request:
     branches: [ "Fix-github-publish-actions" ]
-  # pull_request:
-  #   branches: [ "master" ]
-  #   types:
-  #     - closed
+    types:
+      - closed
 
 jobs:
-  # if_merged:
-  #   if: github.event.pull_request.merged == true
-  publish-npm:
+  if_merged:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -29,7 +23,7 @@ jobs:
       - run: |
           git config --global user.email "dohard@163.COM"
           git config --global user.name "dohard"
-          npm version prerelease --preid=alpha -m ":rocket:	%s"
+          npm version prerelease --preid=alpha -m ":package:	%s"
 
       - run: npm install
 
