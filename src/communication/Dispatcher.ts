@@ -1,5 +1,5 @@
 import EventEmitter from 'events';
-import Communication from './Communication';
+import Communication, { RetryError } from './Communication';
 import TCPConnection from '../connection/TCPConnection';
 import SerialPortConnection from '../connection/SerialPortConnection';
 import Packet from './Packet';
@@ -85,7 +85,7 @@ export default class Dispatcher extends EventEmitter {
         return commandSet * 256 + commandId;
     }
 
-    send(commandSet: number, commandId: number, peerId: PeerId = PeerId.CONTROLLER, payload: Buffer) {
+    send(commandSet: number, commandId: number, peerId: PeerId = PeerId.CONTROLLER, payload: Buffer, isRTO: boolean = false, sequence?: number): Promise<ResponseData | undefined> {
         if (this.communication) {
             const header = new Header();
             header.length = payload.byteLength + 8;
@@ -93,16 +93,20 @@ export default class Dispatcher extends EventEmitter {
             header.commandId = commandId;
             header.attribute = Attribute.REQUEST;
             header.receiverId = peerId;
-            header.sequence = this.communication.getSequence();
-
+            header.sequence = sequence ? sequence : this.communication.getSequence();
             const packet = new Packet(header, payload);
             this.writeLog && this.writeLog(`Send: ${packet.toBuffer().toString('hex')}`);
             // console.log('send before send:', packet.toBuffer());
             const businessId = this.evalBusinessId(commandSet, commandId);
-            return this.communication.send(`${businessId}-${header.sequence}`, packet.toBuffer()).then(resPacket => {
+            return this.communication.send(`${businessId}-${header.sequence}`, packet.toBuffer(), true, isRTO).then(resPacket => {
                 const response = new Response().fromBuffer(resPacket!.payload);
                 return { response, packet: resPacket } as unknown as ResponseData;
-            });
+            }).catch((err: RetryError | Error) => {
+                if (err.message === 'Retry send') {
+                    const { commandId, commandSet, receiverId, sequence } = header;
+                    return this.send(commandSet, commandId, receiverId, payload, true, sequence);
+                }
+            })
         }
         return Promise.reject(new Error('communication not initialize'));
     }
@@ -176,7 +180,7 @@ export default class Dispatcher extends EventEmitter {
 
             const payload = Buffer.concat([Buffer.from([commandSet, commandId]), intervalBuffer]);
             return this.send(0x01, 0x00, PeerId.CONTROLLER, payload).then((res) => {
-                if (res.response?.result === 0) {
+                if (res?.response?.result === 0) {
                     this.on(businessIdStr, callback);
                 }
                 return res;
@@ -187,7 +191,7 @@ export default class Dispatcher extends EventEmitter {
     unsubscribe(commandSet: number, commandId: number, callback: ResponseCallback) {
         const payload = Buffer.from([commandSet, commandId]);
         return this.send(0x01, 0x01, PeerId.CONTROLLER, payload).then((res) => {
-            if (res.response?.result === 0) {
+            if (res?.response?.result === 0) {
                 const businessId = `${this.evalBusinessId(commandSet, commandId)}`;
                 if (this.listenerCount(businessId) > 1) {
                     this.removeListener(businessId, callback);
