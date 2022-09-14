@@ -6,7 +6,8 @@
   "scripts": {
     "test": "mocha -r ts-node/register -r tsconfig-paths/register 'tests/**/*.ts'",
     "start": "concurrently \"tsc -w\" \"tsc-alias -w\"",
-    "build": "gulp"
+    "build": "gulp",
+    "link": "concurrently \"npm run build\" \"npm start\""
   },
   "keywords": [],
   "author": "",

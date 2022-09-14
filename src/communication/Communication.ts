@@ -4,10 +4,14 @@ import { calcChecksum, calcCRC8 } from '../helper';
 import { Attribute } from './Header';
 import Packet from './Packet';
 
+export class RetryError extends Error {}
+
 type RequestHandler = {
     startTime: number,
     success: (pkt: Packet) => void,
-    fail: Function
+    fail: Function,
+    sendTime: number,
+    hasResponse: boolean
 };
 
 export default class Communication extends EventEmitter {
@@ -62,18 +66,36 @@ export default class Communication extends EventEmitter {
         return this.sequence;
     }
 
-    send(requestId: string, buffer: Buffer, needReply: boolean = true) {
+    send(requestId: string, buffer: Buffer, needReply: boolean = true, isRTO: boolean = false) {
         if (buffer.length >= 15) {
             if (needReply) {
+                let handler = this.requestHandlerMap.get(requestId);
                 return new Promise<Packet>((resolve, reject) => {
                     // empty payload buffer should be length of 15
-                    this.requestHandlerMap.set(requestId, {
+                    handler = {
                         startTime: Date.now(),
                         success: resolve,
-                        fail: reject
-                    });
+                        fail: reject,
+                        sendTime: handler ? handler.sendTime + 1 : 0,
+                        hasResponse: false
+                    };
+                    this.requestHandlerMap.set(requestId, handler);
                     this.connection && this.connection.write(buffer);
+                    if (isRTO) {
+                        const timer = setTimeout(() => {
+                            clearTimeout(timer);
+                            if (handler && !handler.hasResponse && handler.sendTime >= 2) {
+                                const packet = new Packet();
+                                packet.payload = Buffer.alloc(1, 2);
+                                resolve(packet);
+                                this.requestHandlerMap.delete(requestId);
+                            } else if (handler && !handler.hasResponse && handler.sendTime < 2) {
+                                reject(new RetryError(`Retry send`));
+                            }
+                        }, 2000);
+                    }
                 });
+                
             } else {
                 this.connection && this.connection.write(buffer);
                 return Promise.resolve();

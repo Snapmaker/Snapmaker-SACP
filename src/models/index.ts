@@ -37,6 +37,7 @@ import SetLaserPower from './SetLaserPower'
 import WifiConnectionInfo from './WifiConnectionInfo'
 import XYLevelings from './XYLevelings'
 import ZoneInfo from './ZoneInfo'
+import GcodeCurrentLine from './gcodeCurrentLine';
 
 export {
     AirPurifierInfo,
@@ -76,5 +77,6 @@ export {
     SetLaserPower,
     WifiConnectionInfo,
     XYLevelings,
-    ZoneInfo
+    ZoneInfo,
+    GcodeCurrentLine
 }
