@@ -1,13 +1,26 @@
-src/
-tests/
-.github/
-logs/
+# node
 node_modules/
-.babelrc
-.cnpmrc
+
+# git
+.github/
 .gitignore
+
+# ts
 tsconfig.json
+.babelrc
+
+# package manager
 .npmignore
 .npmrc
+.cnpmrc
 .yarnrc
 **/*.log
+
+# gulp
+gulpfile.js
+
+# script
+src/
+tests/
+logs/
+publish.sh

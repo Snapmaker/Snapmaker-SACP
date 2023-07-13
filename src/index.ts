@@ -1,4 +1,4 @@
-import * as helper from './helper'
+import * as helper from './helper';
 import Dispatcher from './communication/Dispatcher';
 import { ResponseCallback, ResponseData, Serializable, RequestData } from './types';
 import Response from './communication/Response';
@@ -10,6 +10,6 @@ export {
     ResponseCallback,
     ResponseData,
     Serializable,
-    helper
+    helper,
 };
 
