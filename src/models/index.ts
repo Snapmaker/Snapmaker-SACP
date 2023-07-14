@@ -3,11 +3,11 @@ import AirPurifierInfo from './AirPurifierInfo'
 import AxisMotorState from './AxisMotorState'
 import BatchBufferInfo from './BatchBufferInfo'
 import BedInfo from './BedInfo'
+import CNCToolHeadInfo from './CNCToolHeadInfo'
 import CalibrationInfo from './CalibrationInfo'
 import ClearExceptionInfo from './ClearExceptionInfo'
 import CncCalibration from './CncCalibration'
 import CncSpeedState from './CncSpeedState'
-import CNCToolHeadInfo from './CNCToolHeadInfo'
 import CoordinateInfo from './CoordinateInfo'
 import CoordinateSystemInfo from './CoordinateSystemInfo'
 import DryBoxInfo from './DryBoxInfo'
@@ -37,19 +37,26 @@ import SetLaserPower from './SetLaserPower'
 import WifiConnectionInfo from './WifiConnectionInfo'
 import XYLevelings from './XYLevelings'
 import ZoneInfo from './ZoneInfo'
-import GcodeCurrentLine from './gcodeCurrentLine';
+import GcodeCurrentLine from './gcodeCurrentLine'
+import {
+    IPObtain,
+    NetworkConfiguration,
+    NetworkMode,
+    NetworkOptions,
+    NetworkStationState,
+} from './machine-network'
+
 
 export {
     AirPurifierInfo,
     AxisMotorState,
     BatchBufferInfo,
     BedInfo,
+    CNCToolHeadInfo,
     CalibrationInfo,
     ClearExceptionInfo,
     CncCalibration,
-    CncSpeedState,
-    CNCToolHeadInfo,
-    CoordinateInfo,
+    CncSpeedState, CoordinateInfo,
     CoordinateSystemInfo,
     DryBoxInfo,
     EnclosureInfo,
@@ -58,6 +65,7 @@ export {
     ExtruderOffset,
     FdmToolHeadInfo,
     FdmZaxisHeight,
+    GcodeCurrentLine,
     GcodeFileInfo,
     GetHotBed,
     LaserCalibration,
@@ -77,6 +85,14 @@ export {
     SetLaserPower,
     WifiConnectionInfo,
     XYLevelings,
-    ZoneInfo,
-    GcodeCurrentLine
+    ZoneInfo
+}
+
+// Machine Info
+export {
+    IPObtain,
+    NetworkConfiguration,
+    NetworkMode,
+    NetworkOptions,
+    NetworkStationState
 }

@@ -1,23 +1,25 @@
 import EventEmitter from 'events';
-import Communication, { RetryError } from './Communication';
-import TCPConnection from '../connection/TCPConnection';
+
+import { ResponseData } from '..';
 import SerialPortConnection from '../connection/SerialPortConnection';
-import Packet from './Packet';
-import Header, { Attribute, PeerId } from './Header';
-import Response from './Response';
+import TCPConnection from '../connection/TCPConnection';
 import { writeUint16 } from '../helper';
 import { RequestCallback, RequestData, ResponseCallback } from '../types';
-import { ResponseData } from '..';
+import Communication, { RetryError } from './Communication';
+import Header, { Attribute, PeerId } from './Header';
+import Packet from './Packet';
+import Response from './Response';
 
 export default class Dispatcher extends EventEmitter {
-    communication: Communication | null;
+    private communication: Communication | null;
 
-    handlerMap: Map<number, RequestCallback>;
+    private handlerMap: Map<number, RequestCallback>;
 
-    writeLog: Function | undefined;
+    private writeLog: Function | undefined;
 
-    constructor(type: string, socket: any, writeLog: Function | undefined = undefined) {
+    public constructor(type: string, socket: any, writeLog: Function | undefined = undefined) {
         super();
+
         if (!socket) {
             throw new Error('missing socket');
         }
@@ -42,7 +44,7 @@ export default class Dispatcher extends EventEmitter {
         this.writeLog = writeLog;
     }
 
-    dispose() {
+    public dispose() {
         if (this.communication) {
             this.communication.dispose();
             this.communication = null;
@@ -50,7 +52,7 @@ export default class Dispatcher extends EventEmitter {
         this.handlerMap.clear();
     }
 
-    resetBuffer() {
+    public resetBuffer() {
         if (this.communication) {
             this.communication.end();
         }
@@ -87,6 +89,7 @@ export default class Dispatcher extends EventEmitter {
 
     send(commandSet: number, commandId: number, peerId: PeerId = PeerId.CONTROLLER, payload: Buffer, isRTO: boolean = false, sequence?: number): Promise<ResponseData | undefined> {
         if (this.communication) {
+            // construct header
             const header = new Header();
             header.length = payload.byteLength + 8;
             header.commandSet = commandSet;
@@ -94,19 +97,26 @@ export default class Dispatcher extends EventEmitter {
             header.attribute = Attribute.REQUEST;
             header.receiverId = peerId;
             header.sequence = sequence ? sequence : this.communication.getSequence();
+
+            // packet
             const packet = new Packet(header, payload);
+
             this.writeLog && this.writeLog(`Send: ${packet.toBuffer().toString('hex')}`);
+
             // console.log('send before send:', packet.toBuffer());
             const businessId = this.evalBusinessId(commandSet, commandId);
-            return this.communication.send(`${businessId}-${header.sequence}`, packet.toBuffer(), true, isRTO).then(resPacket => {
-                const response = new Response().fromBuffer(resPacket!.payload);
-                return { response, packet: resPacket } as unknown as ResponseData;
-            }).catch((err: RetryError | Error) => {
-                if (err.message === 'Retry send') {
-                    const { commandId, commandSet, receiverId, sequence } = header;
-                    return this.send(commandSet, commandId, receiverId, payload, true, sequence);
-                }
-            })
+            return this.communication
+                .send(`${businessId}-${header.sequence}`, packet.toBuffer(), true, isRTO)
+                .then(resPacket => {
+                    const response = new Response().fromBuffer(resPacket!.payload);
+                    return { response, packet: resPacket } as unknown as ResponseData;
+                })
+                .catch((err: RetryError | Error) => {
+                    if (err.message === 'Retry send') {
+                        const { commandId, commandSet, receiverId, sequence } = header;
+                        return this.send(commandSet, commandId, receiverId, payload, true, sequence);
+                    }
+                });
         }
         return Promise.reject(new Error('communication not initialize'));
     }

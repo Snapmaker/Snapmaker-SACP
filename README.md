@@ -1,21 +1,38 @@
 # snapmaker-sacp-sdk
 
-## development
+SACP implementation in JS.
+
+## Development
+
+1) Install and link
 
 ```bash
-npm i
-npm run start
+npm install
+npm link
 ```
 
-## testing
+2) In target project:
 
-```bash
-npm i
-npm run link
+```
+npm link @snapmaker/snapmaker-sacp-sdk
 ```
 
-Then, execute `npm link snapmaker-sacp-sdk` in your test directory.
+3) In SDK repo, run `npm run link` to keep watching file changes.
 
-Finally, execute `npm run start` and keep the background running.
 
-In this way, the code of SACP SDK can be automatically associated with the test directory.
+## Publish
+
+Use `npm pack` to see preview of package.
+
+### Alpha release
+
+```
+npm publish --tag alpha
+```
+
+### Official release
+
+```
+<!-- npm publish -->
+npm publish --access public
+```
