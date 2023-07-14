@@ -1,6 +1,6 @@
 {
   "name": "@snapmaker/snapmaker-sacp-sdk",
-  "version": "0.0.12",
+  "version": "0.1.0",
   "description": "",
   "main": "./dist/index.js",
   "scripts": {

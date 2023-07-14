@@ -1,6 +1,12 @@
 # snapmaker-sacp-sdk
 
-SACP implementation in JS.
+SACP protocol implementation in TS.
+
+## Installation
+
+```bash
+npm install -S @snapmaker/snapmaker-sacp-sdk
+```
 
 ## Development
 
