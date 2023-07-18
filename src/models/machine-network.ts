@@ -23,7 +23,6 @@ export interface NetworkOptions {
     // apSSID?: string;
 }
 
-
 export class NetworkConfiguration implements Serializable {
     public networkMode: NetworkMode;
 
@@ -67,7 +66,7 @@ export class NetworkConfiguration implements Serializable {
                 if (this.stationIPObtain === IPObtain.Static) {
                     return stringToBuffer(this.stationIP);
                 } else {
-                    return stringToBuffer('');
+                    return stringToBuffer('0.0.0.0'); // not specified, use '' will crash controller
                 }
             } else {
                 return stringToBuffer('');

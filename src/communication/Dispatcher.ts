@@ -3,6 +3,7 @@ import EventEmitter from 'events';
 import { ResponseData } from '..';
 import SerialPortConnection from '../connection/SerialPortConnection';
 import TCPConnection from '../connection/TCPConnection';
+import UDPCOnnection from '../connection/UDPCOnnection';
 import { writeUint16 } from '../helper';
 import { RequestCallback, RequestData, ResponseCallback } from '../types';
 import Communication, { RetryError } from './Communication';
@@ -32,6 +33,8 @@ export default class Dispatcher extends EventEmitter {
             connection = new TCPConnection(this.communication, socket);
         } else if (type === 'serialport') {
             connection = new SerialPortConnection(this.communication, socket);
+        } else if (type === 'udp') {
+            connection = new UDPCOnnection(this.communication, socket);
         } else {
             throw new Error('missing type');
         }
