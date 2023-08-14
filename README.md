@@ -1,4 +1,4 @@
-# snapmaker-sacp-sdk
+# Snapmaker SACP
 
 SACP protocol implementation in TS.
 
