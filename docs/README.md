@@ -61,7 +61,7 @@ With networked connection
 There are two implementation of SACP, one over TCP connection, another over UDP packats.
 
 - SACP over TCP: Establish a TCP long-lived connection, and send/receive SACP packets over the connection. Uses port 8888.
-- SACP over UDP: Without connection establish, send/receive SACP packets via UDP packets. Users port 2016 (temporarily)
+- SACP over UDP: Without connection establish, send/receive SACP packets via UDP packets. Uses port 8889.
  
 SACP defines as follows:
 
@@ -75,3 +75,14 @@ Avaible commands (editing):
 - 3D printing commands (TODO)
 - Laser commands (TODO)
 - CNC commands (TODO)
+
+
+## Switch to SACP (using serial port)
+
+By default, commands via SACP over TCP/UDP is enabled on networked Snapmaker machines.
+
+By default, commands via serial port (baud rate 115200 or 460800) is G-code (plaintext). You can use following commands to switch the protocol to SACP:
+
+- M2000 S5 P1 (for Snapmaker Artisan / J1)
+- M2000 U5 (for Snapmaker Ray)
+- $PS (for Snapmaker Ray)
