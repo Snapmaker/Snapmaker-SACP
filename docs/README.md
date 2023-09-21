@@ -68,13 +68,17 @@ SACP defines as follows:
 - [Data Types](Types.md) defines basic data types.
 - [SACP Packet](Packet.md) defines a SACP packet should look like.
 
-Avaible commands (editing):
+Available commands (editing):
 
 - [System Commands](System-Commands.md)
 - [File Commands](File-Commands.md)
 - 3D printing commands (TODO)
-- Laser commands (TODO)
+- [Laser commands](Laser-Commands.md)
 - CNC commands (TODO)
+
+Available Modules:
+
+- [Modules](./Modules.md)
 
 
 ## Switch to SACP (using serial port)

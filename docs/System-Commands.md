@@ -21,7 +21,34 @@ ACK Payload:
 
 ## 0x01 0x20 Get Module Info List
 
-TODO
+| Command Set | Command ID |
+|-------------|------------|
+| 0x01 | 0x20 | 
+
+Request Payload:
+
+| Payload | Data Type | Description | 
+|---------|-----------|-------------|
+| - | - | - |
+
+ACK Payload:
+
+| Payload | Data Type | Description |
+|---------|-----------|-------------|
+| Result | UInt8 | result = 0 means success |
+| module info list | Array<ModuleInfo> | an array of all modules |
+
+Brief structure of `class ModuleInfo`:
+
+- key: UInt8, unique module key
+- moduleId: UInt16, Indicate which kind of module it is
+- moduleIndex: UInt8
+- moduleState: UInt8
+- serialNumber: UInt32
+- hardwareVersion: UInt8
+- firmwareVersion: String
+
+Checkout [Modules](./Modules) for all available module IDs.
 
 ## 0x01 0x21 Get Machine Info
 
